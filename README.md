@@ -2,7 +2,7 @@
 
 BKChem is a free (as in free software) chemical drawing program. This repository contains a modernized version of BKChem, fully ported to **Python 3**.
 
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-orange.svg)](https://buymeacoffee.com/vijaymasand)
+<a href="https://buymeacoffee.com/vijaymasand"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="200" alt="Buy Me a Coffee"></a>
 
 ## Overview
 
