@@ -28,6 +28,14 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 
 * Forced a fixed 8pt font size and 4px vertical displacement for subscripts and superscripts in xml_writer.py. This prevents the "Giant Subscript" bug in Linux image viewers like Nomacs or GPicView, ensuring formulas like H2​O or CH4​ render accurately.
 
+### 7. Functional Group and Atom Editing Stability
+
+* Fixed the AttributeError: 'NoneType' object has no attribute 'delete' error that occurred when typing groups with more than one element (like OH or NH2) and pressing Enter.
+
+* Implemented a "triple-shield" protection using try/except blocks in special_parents.py, atom.py, and molecule.py. This ensures that if the chemical validation engine doesn't recognize a group as a pure periodic table atom, the program automatically processes it as a text group (textatom) instead of crashing.
+
+* Result: Improved workflow when drawing fatty acids and complex molecules, allowing free editing of atom labels without unexpected shutdowns.
+
 
 
 ---
@@ -60,6 +68,13 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 * Se resolvió el error NameError: name 'unicode' is not defined migrando todo el manejo de texto a str de Python 3 en el archivo classes.py, permitiendo que la "Herramienta de Texto" funcione sin cierres inesperados.
 
 * Se forzó un tamaño de fuente fijo de 8pt y un desplazamiento vertical de 4px para subíndices y superíndices en xml_writer.py. Esto evita el error del "Subíndice Gigante" en visores de imágenes de Linux como Nomacs o GPicView, garantizando que fórmulas como H2​O o CH4​ se representen con precisión.
+
+### 7. Estabilidad en Grupos Funcionales y Edición de Átomos.
+* Se corrigió el error AttributeError: 'NoneType' object has no attribute 'delete' que ocurría al intentar escribir grupos con más de un elemento (como OH o NH2) y pulsar Enter.
+
+* Implementación de un "triple escudo" de protección mediante bloques try/except en special_parents.py, atom.py y molecule.py. Esto permite que, si el motor de validación química no reconoce un grupo como un átomo puro de la tabla periódica, el programa lo procese automáticamente como un grupo de texto (textatom) en lugar de cerrarse inesperadamente.
+
+* Resultado: Mayor fluidez al dibujar ácidos grasos y moléculas complejas, permitiendo la edición libre de etiquetas de átomos sin interrupciones.
 
 ---
 ##  Modified Files / Archivos Modificados:
