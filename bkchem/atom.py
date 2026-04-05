@@ -266,8 +266,9 @@ class atom( drawable_chem_vertex, oasa.atom):
       form = PT.text_to_hydrogenated_atom( name)
       if form:
         # it is!
-        a = form.keys()
-        a.remove( 'H')
+        # Usamos PT que es como se importó la tabla periódica en este archivo
+        a = list(PT.periodic_table.keys())
+        a.remove('H')
         if occupied_valency == None:
           valency = self.occupied_valency
         else:

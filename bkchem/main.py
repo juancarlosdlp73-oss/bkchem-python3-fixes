@@ -496,7 +496,7 @@ class BKChem( Tk):
                        'plus', 'text', 'bracket', 'rotate', 'bondalign', 'vector', 'misc']#  'reaction', 'externaldata'] #, 'rapiddraw']
 
     # import plugin modes
-    import imp
+    import importlib as imp
     for plug_name in self.plug_man.get_names( type="mode"):
       plug = self.plug_man.get_plugin_handler( plug_name)
       module_name = plug.get_module_name()
@@ -784,24 +784,34 @@ class BKChem( Tk):
       return self._save_according_to_extension( name, update_default_dir=update_default_dir)
 
 
-  def save_as_CDML( self):
-    """asks the user the name for a file and saves the current paper there,
-    dir and name should be given as starting values"""
-    dir = self.paper.file_name['dir']
+  def save_as_CDML( self ):
+    """asks the user the name for a file and saves the current paper there"""
+    import os
+    # 1. Traemos la carpeta inteligente que configuramos en export.py
+    from .export import get_target_directory
+    target_dir = get_target_directory()
+    
+    dir = target_dir # Forzamos que empiece en Imágenes/BKChem
     name = self.paper.file_name['name']
-    a = asksaveasfilename( defaultextension = ".svg", initialdir = dir, initialfile = name,
-                           title = _("Save As..."), parent = self,
+    
+    # 2. Abrimos el diálogo apuntando a esa carpeta
+    a = asksaveasfilename( defaultextension = ".svg", 
+                           initialdir = dir, 
+                           initialfile = name,
+                           title = _("Save As..."), 
+                           parent = self,
                            filetypes=((_("CD-SVG file"),".svg"),
                                       (_("Gzipped CD-SVG file"),".svgz"),
                                       (_("CDML file"),".cdml"),
                                       (_("Gzipped CDML file"),".cdgz")))
+    
     if a != '' and a!=():
       if self._save_according_to_extension( a):
-        name = self.get_name_dic( a)
-        if self.check_if_the_file_is_opened( name['name'], check_current=0):
-          tkMessageBox.showerror( _("File already opened!"), _("Sorry but you are already editing a file with this name (%s), please choose a different name or close the other file.") % name['name'])
+        name_dic = self.get_name_dic( a)
+        if self.check_if_the_file_is_opened( name_dic['name'], check_current=0):
+          tkMessageBox.showerror( _("File already opened!"), _("Sorry but you are already editing a file with this name (%s), please choose a different name or close the other file.") % name_dic['name'])
           return None
-        self.paper.file_name = self.get_name_dic( a)
+        self.paper.file_name = name_dic
         self.notebook.tab( self.get_paper_tab_name( self.paper)).configure( text = self.paper.file_name['name'])
         return self.paper.file_name
       else:

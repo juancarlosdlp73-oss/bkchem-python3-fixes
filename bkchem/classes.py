@@ -613,7 +613,7 @@ class text( meta_enabled, interactive, point_drawable, text_like, area_colored, 
     return self._ftext
 
   def _set_xml_ftext( self, text):
-    if not type( text) == unicode:
+    if not isinstance(text, str):
       text = text.decode( 'utf-8')
     self._ftext = text
 

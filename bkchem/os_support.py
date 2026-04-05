@@ -27,10 +27,18 @@ env_vars = {'template': 'BKCHEM_TEMPLATE_PATH',
             'image': 'BKCHEM_IMAGE_PATH',
             'plugin': 'BKCHEM_PLUGIN_PATH'}
 
-std_dirs = {'template': '../templates',
-            'pixmap': '../pixmaps',
-            'image': '../images',
-            'plugin': '../plugins'}
+
+# Detectamos la carpeta donde está instalado el programa (bkchem/)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# La carpeta principal es la que está un nivel arriba
+base_dir = os.path.join(current_dir, "..")
+
+std_dirs = {
+    'template': os.path.join(base_dir, 'templates'),
+    'pixmap':   os.path.join(base_dir, 'pixmaps'),
+    'image':    os.path.join(base_dir, 'images'),
+    'plugin':   os.path.join(base_dir, 'plugins')
+}
 
 
 class os_support_store:

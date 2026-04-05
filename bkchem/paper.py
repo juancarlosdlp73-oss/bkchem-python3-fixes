@@ -874,7 +874,7 @@ class chem_paper( Canvas, object):
   def set_name_to_selected( self, name, interpret=1):
     """sets name to all selected atoms and texts,
     also records it in an undo !!!"""
-    if type( name) != unicode:
+    if not isinstance(name, str):
       name = name.decode('utf-8')
     vtype = None
     for item in self.selected[:]:
@@ -1703,14 +1703,14 @@ class chem_paper( Canvas, object):
     else:
       self.coords( self.background, 0, 0, '%dm'%sx, '%dm'%sy)
 
-    # crop svg
-    self._paper_properties['crop_svg'] = self.standard.paper_crop_svg
-    # crop margin
-    self._paper_properties['crop_margin'] = self.standard.paper_crop_margin
+
+    # crop svg - FORZADO A 1 (SI) PARA QUE NO SALGA MINIATURA
+    self._paper_properties['crop_svg'] = 1 
+    # crop margin - FORZADO A 10 PIXELES DE SEGURIDAD
+    self._paper_properties['crop_margin'] = 10
     self._paper_properties['use_real_minus'] = Store.pm.get_preference( "use_real_minus") or 0
     self._paper_properties['replace_minus'] = Store.pm.get_preference( "replace_minus") or 0
     self.update_scrollregion()
-
     
 
   def create_background( self):

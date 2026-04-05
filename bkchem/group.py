@@ -119,7 +119,10 @@ class group( drawable_chem_vertex):
       else:
         return GT.groups_table[ self.symbol.lower()]['textb']
     elif self.group_type in ("implicit","chain"):
-      x = re.sub( "\d+", '<sub>\g<0></sub>', self.symbol)
+      symbol_text = self.symbol
+      if isinstance(symbol_text, bytes):
+        symbol_text = symbol_text.decode('utf-8')
+      x = re.sub( "\d+", '<sub>\g<0></sub>', symbol_text)
       x = re.sub( "[+-]", '<sup>\g<0></sup>', x)
       if self.paper.get_paper_property('use_real_minus'):
         x = re.sub("-", chr(8722), x)
