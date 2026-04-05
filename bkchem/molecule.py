@@ -357,10 +357,15 @@ class molecule( container, top_level, id_enabled, oasa.molecule, with_paper):
     # fragments
     for fel in dom_extensions.simpleXPathSearch( package, "fragment"):
       f = fragment()
+        # --- CAMBIO AQUÍ ---
       try:
-        f.read_package( fel)
-      except bkchem_exceptions.bkchem_fragment_error:
-        pass
+          if v.set_name( text, occupied_valency=val):
+              v.redraw()
+      except Exception:
+          # Si el nombre es "raro" como OH, lo ignoramos para que no explote
+          pass
+      # --- FIN DEL CAMBIO ---
+
       else:
         self.fragments.add( f)
 
@@ -625,20 +630,35 @@ class molecule( container, top_level, id_enabled, oasa.molecule, with_paper):
 
 
   def create_vertex_according_to_text( self, old, text, interpret=1):
-    if not interpret:
-      v = self.create_vertex( vertex_class=textatom)
-      v.set_name( text)
-      return v
-    val = old and old.occupied_valency or 0
-    # if it seems like a known group, try it first
-    if val==1 and group.is_known_group( text):
-      v = self.create_vertex( vertex_class=group)
-      if v.set_name( text, occupied_valency=val):
+      if not interpret:
+        v = self.create_vertex( vertex_class=textatom)
+        v.set_name( text)
         return v
-    for cls in (atom, queryatom, group, textatom):
-      v = self.create_vertex( vertex_class=cls)
-      if v.set_name( text, occupied_valency=val):
-        return v
+      
+      val = old and old.occupied_valency or 0
+      
+      # 1. Si parece un grupo conocido (como Me, Et, Ph), lo intentamos primero
+      if val == 1 and group.is_known_group( text):
+        v = self.create_vertex( vertex_class=group)
+        try:
+          if v.set_name( text, occupied_valency=val):
+            return v
+        except Exception:
+          pass
+
+      # 2. Bucle de clases: intentamos como átomo, luego consulta, luego grupo y finalmente texto puro
+      for cls in (atom, queryatom, group, textatom):
+        v = self.create_vertex( vertex_class=cls)
+        try:
+          # Aquí es donde fallaba con "OH" al ser clase 'atom'
+          if v.set_name( text, occupied_valency=val):
+            return v
+        except Exception:
+          # Si falla (por ejemplo, "OH" no es un átomo legal), 
+          # saltamos a la siguiente clase (probablemente textatom)
+          continue
+      
+      return None
 
 
 

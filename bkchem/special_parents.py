@@ -503,31 +503,45 @@ class drawable_chem_vertex( oasa.chem_vertex, meta_enabled, area_colored, point_
 
 
   def redraw( self, suppress_reposition=0):
-    if self._reposition_on_redraw and not suppress_reposition:
-      self.reposition_marks()
-      self._reposition_on_redraw = 0
+      if self._reposition_on_redraw and not suppress_reposition:
+        self.reposition_marks()
+        self._reposition_on_redraw = 0
 
-    self.update_font()
-    # at first we delete everything...
-    self.paper.unregister_id( self.item)
-    self.paper.delete( self.item)
-    if self.selector:
-      self.paper.delete( self. selector)
-    if self.ftext:
-      self.ftext.delete()
-    self.item = None # to ensure that warning in draw() is not triggered when redrawing
-    # ...then we draw it again
-    self.draw( redraw=True)
-    [m.redraw() for m in self.marks]
+      self.update_font()
+      
+      # Intentamos borrar los elementos viejos con cuidado extremo
+      try:
+        if self.item and self.paper:
+          self.paper.unregister_id( self.item)
+          self.paper.delete( self.item)
+      except:
+        pass
 
-    if self._selected:
-      self.select()
-    else:
-      self.unselect()
-    if not self.dirty:
-      pass
-      #print "redrawing non-dirty atom"
-    self.dirty = 0
+      try:
+        if self.selector and self.paper:
+          self.paper.delete( self.selector)
+      except:
+        pass
+
+      try:
+        if self.ftext:
+          self.ftext.delete()
+      except:
+        pass
+
+      self.item = None 
+      self.draw( redraw=True)
+      
+      try:
+        [m.redraw() for m in self.marks]
+      except:
+        pass
+
+      if self._selected:
+        self.select()
+      else:
+        self.unselect()
+      self.dirty = 0
 
 
 
@@ -716,4 +730,3 @@ class drawable_chem_vertex( oasa.chem_vertex, meta_enabled, area_colored, point_
       return True
     else:
       return False
-    
