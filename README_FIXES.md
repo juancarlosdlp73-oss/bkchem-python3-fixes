@@ -36,6 +36,13 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 
 * Result: Improved workflow when drawing fatty acids and complex molecules, allowing free editing of atom labels without unexpected shutdowns.
 
+### 8. Automatic Desktop Launcher
+
+* Auto-configuration implementation: Added a function in start_bkchem.py that automatically detects the project's installation path.
+
+* Shortcut creation: Upon the first execution, the script generates a .desktop file on the user's desktop with the correct icon and environment paths.
+
+* Portability: This removes the need to manually configure Python or system paths, making the software "portable" across different folders or users.
 
 
 ---
@@ -76,6 +83,14 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 
 * Resultado: Mayor fluidez al dibujar ácidos grasos y moléculas complejas, permitiendo la edición libre de etiquetas de átomos sin interrupciones.
 
+### 8. Lanzador Automático de Escritorio.
+
+* Implementación de autoconfiguración: Se añadió una función en start_bkchem.py que detecta automáticamente la ruta de instalación del proyecto.
+
+* Creación de acceso directo: Al ejecutar el programa por primera vez, el script genera un archivo .desktop en el escritorio del usuario con el icono y las rutas correctas.
+
+* Portabilidad: Esto elimina la necesidad de configurar manualmente las rutas de Python o del sistema, permitiendo que el software sea "portable" entre diferentes carpetas o usuarios.
+
 ---
 ##  Modified Files / Archivos Modificados:
 * `bkchem/xml_writer.py`
@@ -83,6 +98,7 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 * `bkchem/export.py`
 * `bkchem/main.py`
 * `bkchem/classes.py`
+* `bkchem/start_bkchem.py`
 * `bkchem/pixmaps/` -> (Path & loading logic / Lógica de rutas)
 
 *Maintained and repaired in 2026. / Mantenido y reparado en 2026.*
