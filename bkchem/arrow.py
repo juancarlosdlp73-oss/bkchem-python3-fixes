@@ -115,6 +115,8 @@ class arrow( meta_enabled, drawable, with_line, line_colored, container, interac
 
 
   def draw( self):
+    if not self.points:
+      return
     if len( self.points) > 1:
       #type = self.spline and 'circle' or 'invisible'
       type = 'invisible'

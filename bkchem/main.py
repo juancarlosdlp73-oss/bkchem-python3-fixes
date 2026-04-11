@@ -81,7 +81,12 @@ class BKChem( Tk):
                         "insertBackground","#ffffff")
 
     oasa.config.Config.molecule_class = molecule.molecule
-    
+    # ESTO ES LO QUE AÑADIMOS PARA EL DOBLE CLIC
+    import sys
+    if len( sys.argv) > 1:
+      file_to_open = sys.argv[1]
+      # Esperamos 200ms para que la interfaz se cargue antes de abrir el archivo
+      self.after( 200, lambda: self.load_CDML( file_to_open))
 
   def initialize( self):
     self.in_batch_mode = 0

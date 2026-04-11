@@ -631,10 +631,12 @@ class chem_paper( Canvas, object):
     # viewport
     viewport = dom_extensions.getFirstChildNamed( CDML, 'viewport')
     if viewport:
-      viewport = viewport.getAttribute( 'viewport')
-      self.set_viewport( view= map( float, viewport.split(' ')))
+      v_coords = viewport.getAttribute( 'viewport')
+      # El cambio es añadir list() alrededor del map
+      self.set_viewport( view= list(map( float, v_coords.split(' '))))
     else:
       self.set_viewport()
+
     # standard must be read before all items
     new_standard = self.read_standard_from_dom( CDML)
     old_standard = self.standard
