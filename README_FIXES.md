@@ -44,6 +44,12 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 
 * Portability: This removes the need to manually configure Python or system paths, making the software "portable" across different folders or users.
 
+### 9. Usability and File Association
+
+* Double-Click Support: Modified the program startup in main.py to handle system arguments. This allows .cdml files to open directly when double-clicked in the file manager.
+
+* Chemical Data Persistence: Optimized the reading of native .cdml files. Using this format ensures all atomic information, bonds, and arrows are correctly recovered thanks to the new stability patches.
+
 
 ---
 
@@ -91,14 +97,21 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 
 * Portabilidad: Esto elimina la necesidad de configurar manualmente las rutas de Python o del sistema, permitiendo que el software sea "portable" entre diferentes carpetas o usuarios.
 
----
-##  Modified Files / Archivos Modificados:
-* `bkchem/xml_writer.py`
-* `bkchem/paper.py`
-* `bkchem/export.py`
-* `bkchem/main.py`
-* `bkchem/classes.py`
-* `bkchem/start_bkchem.py`
-* `bkchem/pixmaps/` -> (Path & loading logic / Lógica de rutas)
+### 9. Usabilidad y Asociación de Archivos
 
-*Maintained and repaired in 2026. / Mantenido y reparado en 2026.*
+* Soporte de Doble Clic: Se ha modificado el arranque del programa en main.py para que acepte argumentos del sistema. Esto permite que, al asociar los archivos .cdml con BKChem en Linux, se abran directamente con un doble clic.
+
+* Persistencia de Datos Químicos: Optimización de la lectura de archivos nativos .cdml. Al usar este formato, se garantiza que toda la información atómica, enlaces y flechas se recuperen correctamente gracias a los nuevos parches de estabilidad.
+
+---
+###  Modified Files / Archivos Modificados:
+* bkchem/xml_writer.py
+* bkchem/paper.py (Viewport Fix)
+* bkchem/export.py
+* bkchem/main.py (Double-click Fix)
+* bkchem/classes.py
+* bkchem/arrow.py (Arrow Stability Fix)
+* bkchem/start_bkchem.py
+* bkchem/pixmaps/
+
+Maintained and repaired in 2026. / Mantenido y reparado en 2026.
