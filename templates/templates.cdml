@@ -424,4 +424,42 @@
     <bond double_ratio="0.75" end="atom23703" line_width="1.0" start="atom946" type="n1"/>
     <bond double_ratio="0.75" end="atom99461" line_width="1.0" start="atom70892" type="n1"/>
   </molecule>
+
+  <molecule id="D-Aldohexose" name="D-Aldohexose">
+    <template atom="atom16020" bond_first="atom16020" bond_second="atom16019"/> // Estos enlaces y átomos no se ven, pero son necesarios para que el programa funcione correctamente
+    <atom id="atom16020" name="H"><point x="2.500" y="-1.430"/></atom> //átomo 8 No se ve
+    <atom id="atom16019" name="O"><point x="1.833" y="-1.430"/></atom> //átomo 7 No se ve
+    <atom id="atom94075" name="C"><point x="0.000" y="0.000"/></atom> //átomo 3
+    <atom id="atom20109" name="C"><point x="1.245" y="-0.000"/></atom> //átomo 2 No se ve
+    <atom id="atom40143" name="C"><point x="1.833" y="-0.715"/></atom> //átomo 1  No se ve
+    <atom id="atom28475" name="C"><point x="0.000" y="-1.430"/></atom>  //Átomo 5 No se ve
+    <atom id="atom45430" name="C"><point x="-0.588" y="-0.715"/></atom> //átomo 4 No se ve
+    <atom id="atom24657" name="O"><point x="1.245" y="-1.430 "/></atom> //átomo de O
+    <atom id="atom2549" name="CH&lt;sub&gt;2&lt;/sub&gt;OH" show_name="yes" pos="center"><point x="0.000" y="-2.030"/></atom> //átomo 6 CH2OH
+    <atom id="atom41737" name="C"><point x="1.833" y="-0.115"/></atom> //OH 1.2
+    <atom id="atom88047" name="C"><point x="1.245" y="-0.600"/></atom> //OH 2.1
+    <atom id="atom12401" name="C"><point x="-0.000" y="0.600"/></atom>  // OH 3.2
+    <atom id="atom46028" name="C"><point x="-0.588" y="-1.315"/></atom> //OH 4.1
+    <atom id="atom40624" name="C"><point x="-0.588" y="-0.115"/></atom> //OH 4.2
+    <atom id="atom52108" name="C"><point x="1.245" y="0.600"/></atom>   //OH 2.2
+    <atom id="atom16018" name="C"><point x="1.833" y="-1.315"/></atom>   //OH 1.1
+    <atom id="atom94956" name="C"><point x="0.000" y="-0.600"/></atom>   //OH 3.1
+    <bond start="atom94075" end="atom12401"/>
+    <bond start="atom40143" end="atom16018"/>
+    <bond start="atom28475" end="atom2549"/>
+    <bond start="atom94075" end="atom94956"/>
+    <bond start="atom20109" end="atom40143"/>
+    <bond start="atom45430" end="atom94075"/>
+    <bond start="atom40143" end="atom41737"/>
+    <bond start="atom94075" end="atom20109"/>
+    <bond start="atom20109" end="atom52108"/>
+    <bond start="atom40143" end="atom24657"/>
+    <bond start="atom45430" end="atom46028"/>
+    <bond start="atom24657" end="atom28475"/>
+    <bond start="atom28475" end="atom45430"/>
+    <bond start="atom45430" end="atom40624"/>
+    <bond start="atom20109" end="atom88047"/>
+    <bond start="atom16018" end="atom16019"/>
+    <bond start="atom16019" end="atom16020"/>
+  </molecule>`;
 </cdml>

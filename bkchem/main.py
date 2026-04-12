@@ -80,6 +80,7 @@ class BKChem( Tk):
     self.option_add( "*Entry*Foreground", "#000000")
     self.tk_setPalette( "background", config.background_color,
                         "insertBackground","#ffffff")
+                        
 
     oasa.config.Config.molecule_class = molecule.molecule
     # ESTO ES LO QUE AÑADIMOS PARA EL DOBLE CLIC
@@ -1201,7 +1202,7 @@ class BKChem( Tk):
   def get_name_dic( self, name='', local_file=0):
     if not name:
       while 1:
-        name = 'untitled%d.svg' % self._untitled_counter
+        name = 'untitled%d.cdml' % self._untitled_counter
         self._untitled_counter += 1
         if not self.check_if_the_file_is_opened( name):
           break

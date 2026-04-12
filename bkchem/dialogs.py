@@ -228,29 +228,42 @@ class config_dialog:
       #self.marks.pack()
 
     # BOND
+    # BOND
     if 'bond' in types:
       self.bond_page = self.pages.add(_('Bond'))
-      # bond_widths (former distances)
-      dists = misc.filter_unique( map( abs, [o.bond_width for o in items if o.object_type == 'bond']))
-      if len( dists) == 1:
-        dist = dists[0]
-      else:
-        dist = ''
-      if not misc.split_number_and_unit( dist)[1]:
-        dist = str( dist) + 'px'
-      self.bond_dist = widgets.WidthChooser( self.bond_page, dist, label=_('Bond width'))
-      self.bond_dist.pack( anchor='ne', padx=10, pady=5)
+      
+      # 1. Campo de Longitud (Corregido para multiselección)
+      # Obtenemos las longitudes reales de todos los enlaces seleccionados
+      lengths = misc.filter_unique([round(o.get_length(), 1) for o in self.items if o.object_type == 'bond'])
+      
+      # Si todos miden igual, mostramos ese valor; si no, sugerimos 25px
+      l_init = "%spx" % lengths[0] if len(lengths) == 1 else "25px"
+        
+      self.bond_length = widgets.LengthChooser(self.bond_page, l_init, label=_('Length'))
+      self.bond_length.pack(anchor='nw', padx=10, pady=5)
 
-      # wedge_widths
-      dists = misc.filter_unique( map( abs, [o.wedge_width for o in items if o.object_type == 'bond']))
-      if len( dists) == 1:
-        dist = dists[0]
-      else:
-        dist = ''
-      if not misc.split_number_and_unit( dist)[1]:
-        dist = str( dist) + 'px'
-      self.wedge_width = widgets.WidthChooser( self.bond_page, dist, label=_('Wedge/Hatch width'))
-      self.wedge_width.pack( anchor='ne', padx=10, pady=5)
+      # 2. Bond width (Distancia entre líneas en dobles enlaces)
+      dists = misc.filter_unique(map(abs, [o.bond_width for o in self.items if o.object_type == 'bond']))
+      dist = dists[0] if len(dists) == 1 else ''
+      if not misc.split_number_and_unit(dist)[1]:
+        dist = str(dist) + 'px'
+      self.bond_dist = widgets.WidthChooser(self.bond_page, dist, label=_('Bond width'))
+      self.bond_dist.pack(anchor='nw', padx=10, pady=5)
+
+      # 3. Wedge/Hatch width
+      wdists = misc.filter_unique(map(abs, [o.wedge_width for o in self.items if o.object_type == 'bond']))
+      wdist = wdists[0] if len(wdists) == 1 else ''
+      if not misc.split_number_and_unit(wdist)[1]:
+        wdist = str(wdist) + 'px'
+      self.wedge_width = widgets.WidthChooser(self.bond_page, wdist, label=_('Wedge/Hatch width'))
+      self.wedge_width.pack(anchor='nw', padx=10, pady=5)
+
+      # 4. Double bond length ratio
+      ratios = misc.filter_unique([o.double_length_ratio for o in self.items if o.object_type == 'bond'])
+      ratio = ratios[0] if len(ratios) == 1 else ''
+      self.double_length_ratio = widgets.RatioCounter(self.bond_page, ratio, label=_('Double-bond length ratio'))
+      self.double_length_ratio.pack(anchor='nw', padx=10, pady=5)
+
 
 
       # double bond length ratio
@@ -414,13 +427,44 @@ class config_dialog:
           # font is in common now
         # BOND
         elif o.object_type == 'bond':
-          # width is in common now
-          # bond_width
-          d = Screen.any_to_px( self.bond_dist.getvalue())
-          if d:
-            if d != abs( o.bond_width):
-              o.bond_width = d * misc.signum( o.bond_width)
+          # A) CAMBIO DE LONGITUD INTELIGENTE (Para Haworth)
+          new_l_str = self.bond_length.getvalue()
+          if new_l_str:
+            # Aseguramos px para evitar el error de cm
+            if not any(u in new_l_str for u in ('px','cm','in','pt')):
+              new_l_str += "px"
+            
+            target_l = Screen.any_to_px(new_l_str)
+            current_l = o.get_length()
+            
+            if target_l != current_l and current_l > 0:
+              # DECISIÓN INTELIGENTE: ¿Qué átomo movemos?
+              # Movemos el que tenga menos vecinos (el grupo funcional) para no romper el anillo.
+              a1_neighbors = len(o.atom1.neighbors) if hasattr(o.atom1, 'neighbors') else 99
+              a2_neighbors = len(o.atom2.neighbors) if hasattr(o.atom2, 'neighbors') else 99
+              
+              # Definimos origen (fijo) y destino (móvil)
+              if a1_neighbors >= a2_neighbors:
+                fixed_at, moving_at = o.atom1, o.atom2
+              else:
+                fixed_at, moving_at = o.atom2, o.atom1
+              
+              # Coordenadas
+              x1, y1 = fixed_at.get_xy()
+              x2, y2 = moving_at.get_xy()
+              
+              # Cálculo vectorial preciso
+              ratio = target_l / current_l
+              new_x = x1 + (x2 - x1) * ratio
+              new_y = y1 + (y2 - y1) * ratio
+              
+              # Limpieza y movimiento
+              if hasattr(moving_at, 'delete'): moving_at.delete()
+              moving_at.x, moving_at.y = new_x, new_y
+              moving_at.draw()
+              o.redraw()
               change = 1
+
           # wedge_width
           d = Screen.any_to_px( self.wedge_width.getvalue())
           if d:

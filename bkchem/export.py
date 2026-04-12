@@ -33,6 +33,7 @@ def get_target_directory():
             target = os.path.join(path, 'BKChem')
             os.makedirs(target, exist_ok=True)
             return target
+            
     return home
 
 def export_CD_SVG(paper, filename, gzipped=0):

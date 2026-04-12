@@ -824,50 +824,67 @@ class chem_paper( Canvas, object):
 
 
 
-  def handle_overlap( self):
-    "puts overlaping molecules together to one and then calles handle_overlap(a1, a2) for that molecule"
-    #import time
-    #ttt = time.time()
+  def handle_overlap(self):
+    """Puts overlapping molecules together into one and then calls handle_overlap(a1, a2) for that molecule"""
     overlap = []
     for a in self.find_withtag('atom'):
-      x, y = self.id_to_object( a).get_xy()
-      for b in self.find_overlapping( x-2, y-2, x+2, y+2):
-        if (a != b) and ( 'atom' in self.gettags( b)):
-          a1 = self.id_to_object( a)
-          a2 = self.id_to_object( b)
-          if ( abs( a1.x - a2.x) < 2) and ( abs( a1.y - a2.y) < 2): 
-            if (not [a2,a1] in overlap) and a1.z == a2.z:
-              overlap.append( [a1,a2])
+      obj_a = self.id_to_object(a)
+      if not obj_a: continue
+      x, y = obj_a.get_xy()
+      
+      for b in self.find_overlapping(x-2, y-2, x+2, y+2):
+        if (a != b) and ('atom' in self.gettags(b)):
+          a1 = obj_a
+          a2 = self.id_to_object(b)
+          if a1 and a2 and (abs(a1.x - a2.x) < 2) and (abs(a1.y - a2.y) < 2): 
+            if (not [a2, a1] in overlap) and a1.z == a2.z:
+              overlap.append([a1, a2])
 
     deleted = []
     if overlap:
-      mols = misc.filter_unique( map( lambda a: map( lambda b: b.molecule, a), overlap))
-      #print 3, time.time() - ttt
+      # Obtenemos las parejas de moléculas involucradas
+      mols = []
+      for a1, a2 in overlap:
+          if a1.molecule and a2.molecule:
+              mols.append((a1.molecule, a2.molecule))
+      
+      mols = misc.filter_unique(mols)
+      
       a_eatenby_b1 = []
       a_eatenby_b2 = []
+      
       for (mol, mol2) in mols:
+        # Seguir el rastro de moléculas que ya han sido fusionadas
         while (mol in a_eatenby_b1):
-          mol = a_eatenby_b2[ a_eatenby_b1.index( mol)]
+          mol = a_eatenby_b2[a_eatenby_b1.index(mol)]
         while (mol2 in a_eatenby_b1):
-          mol2 = a_eatenby_b2[ a_eatenby_b1.index( mol2)]
+          mol2 = a_eatenby_b2[a_eatenby_b1.index(mol2)]
+          
         if mol != mol2 and (mol2 not in a_eatenby_b1):
-          mol.eat_molecule( mol2)
-          a_eatenby_b1.append( mol2)
-          a_eatenby_b2.append( mol)
-          self.stack.remove( mol2)
+          mol.eat_molecule(mol2)
+          a_eatenby_b1.append(mol2)
+          a_eatenby_b2.append(mol)
+          
+          # --- EL FIX CRÍTICO ESTÁ AQUÍ ---
+          if mol2 in self.stack:
+              self.stack.remove(mol2)
+          # --------------------------------
         else:
-          deleted.extend( mol.handle_overlap())
-      #print 4, time.time() - ttt
-      deleted.extend( reduce( operator.add, [mol.handle_overlap() for mol in misc.difference( a_eatenby_b2, a_eatenby_b1)], []))
-      self.selected = misc.difference( self.selected, deleted)
+          deleted.extend(mol.handle_overlap())
+
+      # Procesar los solapamientos internos de las moléculas resultantes
+      for m in misc.difference(a_eatenby_b2, a_eatenby_b1):
+          deleted.extend(m.handle_overlap())
+          
+      self.selected = misc.difference(self.selected, deleted)
       self.add_bindings()
-      Store.log( _('concatenated overlaping atoms'))
+      Store.log(_('concatenated overlapping atoms'))
 
     preserved = []
     for a, b in overlap:
-      preserved.append( a in deleted and b or a)
+      preserved.append(a in deleted and b or a)
+    
     return deleted, preserved
-    #print 5, time.time() - ttt
       
 
 

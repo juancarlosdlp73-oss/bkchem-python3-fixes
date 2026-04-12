@@ -69,6 +69,11 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 ### 12. Default Values: Startup Arrow Tool and Safe Scaling Settings.
 
 * Upon starting BKChem, the selection arrow is now chosen by default. Additionally, all checkboxes in the scaling dialog that previously triggered unstable modifications are now unchecked by default.
+
+
+
+
+
 ---
 
 #  BKChem - Versión Corregida por JuanCarlos (Python 3.12)
@@ -141,6 +146,8 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 ### 12. Valores por defecto: Flecha al inicio y valores de escalado seguros.
 * Al iniciar BKChem selecciona la flecha por defecto y al escalar, , están desmarcados toas las pestañas que hacian las modificaciones más inseguras"
 
+### 13. Plantilla cargada de aldohexosa en proyección de Haworth.
+* Botón con D-aldohexosa con plantilla. La plantilla generada a mano en xml, con grandes problemas, punto de anclaje enlace. Es funcional aunque aún no se enlaza bien. Quedan mejoras
 ---
 ###  Modified Files / Archivos Modificados:
 
@@ -157,5 +164,7 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 * bkchem/start_bkchem.py (Desktop Launcher & Auto-Path)
 * bkchem/pixmaps/ (UI Icons & Path Asset Fix)
 * bkchem/dialogs.py
+* bkchem/templates.cdml  -->Aldohexose skeleton added in a button
+
 
 Maintained and repaired in 2026. / Mantenido y reparado en 2026.
