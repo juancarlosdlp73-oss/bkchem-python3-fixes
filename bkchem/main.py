@@ -197,7 +197,7 @@ class BKChem( Tk):
 
     # modes initialization
     self.init_modes()
-    self.mode = 'draw' # this is normaly not a string but it makes things easier on startup
+    self.mode = 'edit' # Cambiado de Draw a Edit, para empezar con la flecha
     self.init_mode_buttons()
 
     # edit pool

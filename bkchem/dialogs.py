@@ -72,20 +72,21 @@ class scale_dialog:
                                                      variable = self.preserve_ratio,
                                                      command = self._preserve_ratio_changed)
     self.preserve_ratio_entry.pack( anchor="w")
-    self.preserve_ratio.set( 1)
+    self.preserve_ratio.set( 0) # CAMBIADO: Ahora desmarcado por defecto
 
     self.preserve_centers = tkinter.IntVar()
     self.preserve_centers_entry = tkinter.Checkbutton( self.dialog.interior(),
                                                        text=_('Fix position of centers of objects?'),
                                                        variable = self.preserve_centers)
     self.preserve_centers_entry.pack( anchor="w")
+    self.preserve_centers.set( 0) # AÑADIDO: Desmarcado por defecto
 
     self.scale_fonts = tkinter.IntVar()
     self.scale_fonts_entry = tkinter.Checkbutton( self.dialog.interior(),
                                                        text=_('Scale font and mark sizes?'),
                                                        variable = self.scale_fonts)
     self.scale_fonts_entry.pack( anchor="w")
-    self.scale_fonts.set( 1)
+    self.scale_fonts.set( 0) # CAMBIADO: Desmarcado por defecto para evitar errores
     
 
     self.dialog.activate()
