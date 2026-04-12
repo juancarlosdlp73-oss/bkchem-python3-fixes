@@ -109,10 +109,35 @@ class SVG_writer( XML_writer):
 
   def add_atom( self, a):
     if a.show:
-      x, y, x2, y2 = self.paper.bbox( a.selector)
+      # --- INICIO DEL PARCHE DE SEGURIDAD ---
+      try:
+        # Intentamos obtener el recuadro del átomo
+        res = self.paper.bbox( a.selector)
+        if res and len(res) == 4:
+          x, y, x2, y2 = res
+        else:
+          # Fallback si el resultado no es lo esperado
+          x, y = a.x, a.y
+      except Exception:
+        # Si da el error TclError (wrong # args), usamos las coordenadas directas
+        x, y = a.x, a.y
+      # --- FIN DEL PARCHE ---
+
       y1 = y + a.font.metrics('ascent') + Tuning.SVG.text_y_shift
+      
+      # Procesamos el texto del átomo (ej. el 'O' o el 'OH')
       text = ftext_dom_to_svg_dom( dom.parseString( ftext_class.sanitize_text( a.xml_ftext)).childNodes[0], self.document)
-      dom_extensions.setAttributes( text, (("x", self.convert( x)), ("y", self.convert( y1)), ("font-family", a.font_family), ("font-size", '%d%s' % (a.font_size, pt_or_px)), ('fill', self.cc( a.line_color))))
+      
+      # Aseguramos que la unidad de medida esté definida
+      pt_or_px = getattr(self, 'pt_or_px', 'pt') 
+      
+      dom_extensions.setAttributes( text, (
+          ("x", self.convert( x)), 
+          ("y", self.convert( y1)), 
+          ("font-family", a.font_family), 
+          ("font-size", '%d%s' % (a.font_size, pt_or_px)), 
+          ('fill', self.cc( a.line_color))
+      ))
       self.group.appendChild( text)
 
   def add_text( self, t):
@@ -132,6 +157,10 @@ class SVG_writer( XML_writer):
 def list_to_svg_points( l):
   return ' '.join( ["%.2f" % x for x in l])
 
+
+
+
+
 def ftext_dom_to_svg_dom( ftext, doc, add_to=None, replace_minus=False):
   if not add_to:
     element = doc.createElement('text')
@@ -140,29 +169,45 @@ def ftext_dom_to_svg_dom( ftext, doc, add_to=None, replace_minus=False):
 
   if ftext.nodeType != ftext.TEXT_NODE:
     name = str(ftext.nodeName)
+    
     if name == "ftext":
       my_svg = element
     else:
       my_svg = doc.createElement('tspan')
       element.appendChild(my_svg)
 
-    if name == 'b': my_svg.setAttribute('font-weight', 'bold')
-    elif name == 'i': my_svg.setAttribute('font-style', 'italic')
-    elif name == 'sup':
-      # Fix Andrea: Superíndice forzado a 8pt y -4px
-      my_svg.setAttribute('font-size', '8pt')
-      my_svg.setAttribute('dy', '-4px')
+    if name == 'b': 
+      my_svg.setAttribute('font-weight', 'bold')
+    elif name == 'i': 
+      my_svg.setAttribute('font-style', 'italic')
+    
     elif name == 'sub':
-      # Fix Andrea: Subíndice forzado a 8pt y +4px
-      my_svg.setAttribute('font-size', '8pt')
-      my_svg.setAttribute('dy', '4px')
+      # USAMOS EL ESTÁNDAR PURO: Firefox y OpenOffice lo aman
+      my_svg.setAttribute('baseline-shift', 'sub')
+      my_svg.setAttribute('font-size', '75%')
+      
+    elif name == 'sup':
+      my_svg.setAttribute('baseline-shift', 'super')
+      my_svg.setAttribute('font-size', '75%')
+
+    elif name == 'tspan':
+      if ftext.hasAttribute('baseline-shift'):
+        my_svg.setAttribute('baseline-shift', ftext.getAttribute('baseline-shift'))
+    
+    else:
+      # RESET: Volver a la línea normal sin empujones extra
+      if name != "ftext":
+        my_svg.setAttribute('baseline-shift', 'baseline')
 
     for el in ftext.childNodes:
       ftext_dom_to_svg_dom(el, doc, add_to=my_svg, replace_minus=replace_minus)
+
   else:
     val = ftext.nodeValue
     if val:
-      if isinstance(val, bytes): val = val.decode('utf-8')
+      if isinstance(val, bytes): 
+        val = val.decode('utf-8')
       txt = str(val).replace("-", chr(8722)) if replace_minus else str(val)
       element.appendChild(doc.createTextNode(txt))
+      
   return element

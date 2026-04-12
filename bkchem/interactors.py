@@ -35,6 +35,8 @@ from .singleton_store import Store
 from .atom import atom
 import operator
 from functools import reduce
+# Añado esta librería
+from gettext import ngettext
 
 
 def ask_name_for_selected( paper):

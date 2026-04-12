@@ -36,16 +36,25 @@ from .singleton_store import Screen, Store
 from functools import reduce
 
 
-### NOTE: now that all classes are children of meta_enabled, so the read_standard_values method
-### is called during their __init__ (in fact meta_enabled.__init__), therefor these values are
-### not set in __init__ itself
+def clean_text( t):
+  """Asegura que el texto sea siempre string de Python 3, eliminando prefijos b' o b\" de forma recursiva."""
+  if t is None:
+    return ""
+  if isinstance( t, bytes):
+    try:
+      return t.decode( 'utf-8', 'ignore')
+    except:
+      return str( t)
+  
+  s = str( t).strip()
+  # Limpieza agresiva de representaciones de bytes convertidas a string por error (b'...')
+  while len( s) >= 3 and s.startswith( "b") and s[1] in ( "'", '"') and s.endswith( s[1]):
+    s = s[2:-1]
+  return s
 
 
 ### Class ATOM --------------------------------------------------
 class atom( drawable_chem_vertex, oasa.atom):
-  # note that all children of simple_parent have default meta infos set
-  # therefor it is not necessary to provide them for all new classes if they
-  # don't differ
 
   object_type = 'atom'
   meta__undo_properties = drawable_chem_vertex.meta__undo_properties + \
@@ -76,9 +85,16 @@ class atom( drawable_chem_vertex, oasa.atom):
       
   # symbol (overrides the oasa.atom.symbol property)
   def _get_symbol( self):
-    return self._symbol
+    try:
+      res = self._symbol
+    except AttributeError:
+      res = 'C'
+    return clean_text( res)
 
   def _set_symbol( self, symbol):
+    symbol = clean_text( symbol)
+    self._symbol = symbol
+    # Pasamos a oasa siempre como string limpio
     oasa.atom._set_symbol( self, symbol)
     if self._symbol != 'C':
       self.show = True
@@ -94,7 +110,10 @@ class atom( drawable_chem_vertex, oasa.atom):
     if show in data.booleans:
       self._show = data.booleans.index( show)
     else:
-      self._show = int( show)
+      try:
+        self._show = int( show)
+      except:
+        self._show = 0
     self.dirty = 1
     self._reposition_on_redraw = 1
 
@@ -110,7 +129,10 @@ class atom( drawable_chem_vertex, oasa.atom):
     if show_hydrogens in data.on_off:
       self._show_hydrogens = data.on_off.index( show_hydrogens)
     else:
-      self._show_hydrogens = int( show_hydrogens)
+      try:
+        self._show_hydrogens = int( show_hydrogens)
+      except:
+        self._show_hydrogens = 0
     self.dirty = 1
     self._reposition_on_redraw = 1
 
@@ -132,10 +154,10 @@ class atom( drawable_chem_vertex, oasa.atom):
   # valency
   def _get_valency( self):
     try:
-      self._valency
+      return self._valency
     except AttributeError:
       self.set_valency_from_name()
-    return self._valency
+      return self._valency
 
   def _set_valency( self, val):
     drawable_chem_vertex._set_valency( self, val)
@@ -147,14 +169,14 @@ class atom( drawable_chem_vertex, oasa.atom):
   # free-sites - replaces oasa.atom.free_sites
   def _set_free_sites( self, free_sites):
     self._free_sites = free_sites
-    marks = self.get_marks_by_type( "free_sites")
+    mks = self.get_marks_by_type( "free_sites")
     if self._free_sites:
-      if not marks:
+      if not mks:
         self.create_mark( "free_sites", draw=self.drawn)
       elif self.drawn:
-        marks[0].redraw()
+        mks[0].redraw()
     else:
-      if marks:
+      if mks:
         self.remove_mark( "free_sites")
 
 
@@ -184,7 +206,9 @@ class atom( drawable_chem_vertex, oasa.atom):
 
   # xml_ftext (override drawable_chem_vertex.xml_ftext)
   def _get_xml_ftext( self):
-    ret = self.symbol
+    # Forzamos limpieza del símbolo para el renderizado
+    ret = clean_text( self.symbol)
+    
     if not self.pos:
       self.decide_pos()
     # hydrogens
@@ -201,14 +225,16 @@ class atom( drawable_chem_vertex, oasa.atom):
       else:
         ret = ret + h
     # charge
-    if self.charge -self.get_charge_from_marks():
+    diff = self.charge - self.get_charge_from_marks()
+    if diff:
       ch = ''
-      if abs( self.charge) > 1:
-        ch += str( abs( self.charge -self.get_charge_from_marks()))
-      if self.charge -self.get_charge_from_marks() > 0:
+      if abs( diff) > 1:
+        ch += str( abs( diff))
+      if diff > 0:
         ch = '<sup>%s+</sup>' % ch
       else:
-        ch = u'<sup>%s%s</sup>' % (ch, self.paper.get_paper_property( 'use_real_minus') and chr( 8722) or "-")
+        minus = chr( 8722) if self.paper.get_paper_property( 'use_real_minus') else "-"
+        ch = '<sup>%s%s</sup>' % (ch, minus)
     else:
       ch = ''
     if self.pos == 'center-last':
@@ -221,24 +247,17 @@ class atom( drawable_chem_vertex, oasa.atom):
 
 
 
-  ## // -------------------- END OF PROPERTIES --------------------------
-
-
   ## -------------------- OVERRIDES OF CHEM_VERTEX METHODS --------------------
 
   def decide_pos( self):
     if self.show_hydrogens or self.free_valency:
-      # in case hydrogens are shown, use the chem_vertex.decide_pos algorithm
       drawable_chem_vertex.decide_pos( self)
     else:
-      #  otherwise always center the first letter
       self.pos = "center-first"
   
 
-  ## // -------------------- END --------------------
-
-
   def set_name( self, name, interpret=1, check_valency=1, occupied_valency=None):
+    name = clean_text( name)
     ret = self._set_name( name, interpret=interpret, check_valency=check_valency, occupied_valency=occupied_valency)
     self.set_valency_from_name()
     self.update_after_valency_change()
@@ -246,18 +265,18 @@ class atom( drawable_chem_vertex, oasa.atom):
 
 
   def _set_name( self, name, interpret=1, check_valency=1, occupied_valency=None):
-    # every time name is set the charge should be set to zero or the value specified by marks
+    name = clean_text( name)
     self.charge = self.get_charge_from_marks()
     self.dirty = 1
-    # try to interpret name
     if name.lower() != 'c':
       self.show = 1
     else:
       self.show = 0
+      
     elch = self.split_element_and_charge( name)
     if elch:
       # name is element symbol + charge
-      self.symbol = elch[0]
+      self.symbol = clean_text( elch[0])
       #self.show_hydrogens = 0
       self.charge += elch[1]
       return True
@@ -266,36 +285,30 @@ class atom( drawable_chem_vertex, oasa.atom):
       form = PT.text_to_hydrogenated_atom( name)
       if form:
         # it is!
-        # Usamos PT que es como se importó la tabla periódica en este archivo
-        a = list(PT.periodic_table.keys())
-        a.remove('H')
-        if occupied_valency == None:
-          valency = self.occupied_valency
-        else:
-          valency = occupied_valency
-        if form['H'] in [i-valency+self.charge for i in PT.periodic_table[a[0]]['valency']]:
-          self.symbol = a[0]
+        sym = clean_text( form.get('symbol'))
+        if not sym:
+            a = list(PT.periodic_table.keys())
+            if 'H' in a:
+                a.remove('H')
+            sym = a[0] if a else 'C'
+            
+        valency = self.occupied_valency if occupied_valency == None else occupied_valency
+        
+        if sym in PT.periodic_table and form['H'] in [i-valency+self.charge for i in PT.periodic_table[sym]['valency']]:
+          self.symbol = clean_text( sym)
           self.show_hydrogens = 1
-          # decide hydrogen placement based on how the name was written (only if it has no neighbor)
           if occupied_valency:
-            self.pos = None # decide later
+            self.pos = None
           else:
             if name.lower().find( "h") < name.lower().find( self.symbol.lower()):
               self.pos = "center-last"
             else:
               self.pos = "center-first"
-          #self.show = 1
           return True
     return False
 
 
-
-
-
-
-
   def draw( self, redraw=False):
-    "draws atom with respect to its properties"
     if self.show:
       drawable_chem_vertex.draw( self, redraw=redraw)
     else:
@@ -310,9 +323,6 @@ class atom( drawable_chem_vertex, oasa.atom):
       self._reposition_on_redraw = 0
 
 
-
-
-
   def focus( self):
     if self.show:
       drawable_chem_vertex.focus( self)
@@ -322,16 +332,12 @@ class atom( drawable_chem_vertex, oasa.atom):
       self.paper.lift( self.item)
 
 
-
-
   def unfocus( self):
     if self.show:
       drawable_chem_vertex.unfocus( self)
     if self.focus_item:
       self.paper.delete( self.focus_item)
       self.focus_item = None
-
-
 
 
   def select( self):
@@ -347,8 +353,6 @@ class atom( drawable_chem_vertex, oasa.atom):
       self._selected = 1
 
 
-
-
   def unselect( self):
     if self.show:
       drawable_chem_vertex.unselect( self)
@@ -358,152 +362,144 @@ class atom( drawable_chem_vertex, oasa.atom):
       self._selected = 0
 
 
-
   def read_package( self, package):
-    """reads the dom element package and sets internal state according to it"""
-    a = ['no','yes']
-    on_off = ['off','on']
-    self.id = package.getAttribute( 'id')
-    # marks (we read them here because they influence the charge)
+    self.id = clean_text( package.getAttribute( 'id'))
+
     for m in package.getElementsByTagName( 'mark'):
       mrk = marks.mark.read_package( m, self)
       self.marks.add( mrk)
-    self.pos = package.getAttribute( 'pos')
+      
+    self.pos = clean_text( package.getAttribute( 'pos'))
+    
     position = package.getElementsByTagName( 'point')[0]
-    # reading of coords regardless of their unit
     x, y, z = Screen.read_xml_point( position)
     if z != None:
       self.z = z* self.paper.real_to_screen_ratio()
-    # needed to support transparent handling of molecular size
     x, y = self.paper.real_to_screen_coords( (x, y))
     self.x = x
     self.y = y
+    
     ft = package.getElementsByTagName('ftext')
     if ft:
-      self.set_name( reduce( operator.add, [e.toxml() for e in ft[0].childNodes], ''), check_valency=0, interpret=0)
+      # Corregido: Unión de nodos XML más robusta para Python 3
+      parts = []
+      for e in ft[0].childNodes:
+          parts.append( clean_text( e.toxml()))
+      content = "".join( parts)
+      self.set_name( content, check_valency=0, interpret=0)
     else:
-      self.set_name( package.getAttribute( 'name'), check_valency=0)
+      self.set_name( clean_text( package.getAttribute( 'name')), check_valency=0)
+      
     # charge
-    self.charge = package.getAttribute('charge') and int( package.getAttribute('charge')) or 0
+    val_charge = clean_text( package.getAttribute('charge'))
+    self.charge = int( val_charge or 0)
+    
     # hydrogens
-    if package.getAttribute( 'hydrogens'):
-      self.show_hydrogens = package.getAttribute('hydrogens')
-    else:
-      self.show_hydrogens = 0
-    # font and fill color
-    fnt = package.getElementsByTagName('font')
-    if fnt:
-      fnt = fnt[0]
-      self.font_size = int( fnt.getAttribute( 'size'))
-      self.font_family = fnt.getAttribute( 'family')
-      if fnt.getAttribute( 'color'):
-        self.line_color = fnt.getAttribute( 'color')
-    # show
-    if package.getAttribute( 'show'):
-      self.show = package.getAttribute( 'show')
+    self.show_hydrogens = clean_text( package.getAttribute( 'hydrogens') or 0)
+      
+    fnt_elements = package.getElementsByTagName('font')
+    if fnt_elements:
+      fnt = fnt_elements[0]
+      self.font_size = int( fnt.getAttribute( 'size') or 12)
+      self.font_family = clean_text( fnt.getAttribute( 'family'))
+      color = clean_text( fnt.getAttribute( 'color'))
+      if color:
+        self.line_color = color
+        
+    show_attr = clean_text( package.getAttribute( 'show'))
+    if show_attr:
+      self.show = show_attr
     else:
       self.show = (self.symbol!='C')
-    # background color
+      
     if package.getAttributeNode( 'background-color'):
-      self.area_color = package.getAttribute( 'background-color')
-    # multiplicity
-    if package.getAttribute( 'multiplicity'):
-      self.multiplicity = int( package.getAttribute( 'multiplicity'))
-    # valency
-    if package.getAttribute( 'valency'):
-      self.valency = int( package.getAttribute( 'valency'))
-    # number
-    if package.getAttribute( 'show_number'):
-      self.show_number = bool( data.booleans.index( package.getAttribute( 'show_number')))
-    if package.getAttribute( 'number'):
-      self.number = package.getAttribute( 'number')
-    # free_sites
-    if package.getAttribute( 'free_sites'):
-      self.free_sites = int( package.getAttribute( 'free_sites'))
-
+      self.area_color = clean_text( package.getAttribute( 'background-color'))
+      
+    mult_attr = clean_text( package.getAttribute( 'multiplicity'))
+    if mult_attr:
+      self.multiplicity = int( mult_attr)
+      
+    val_attr = clean_text( package.getAttribute( 'valency'))
+    if val_attr:
+      self.valency = int( val_attr)
+      
+    show_num_attr = clean_text( package.getAttribute( 'show_number'))
+    if show_num_attr:
+      self.show_number = bool( data.booleans.index( show_num_attr))
+      
+    num_attr = clean_text( package.getAttribute( 'number'))
+    if num_attr:
+      self.number = num_attr
+      
+    fs_attr = clean_text( package.getAttribute( 'free_sites'))
+    if fs_attr:
+      self.free_sites = int( fs_attr)
 
 
   def get_package( self, doc):
-    """returns a DOM element describing the object in CDML,
-    doc is the parent document which is used for element creation
-    (the returned element is not inserted into the document)"""
+    """returns a DOM element describing the object in CDML"""
     yes_no = ['no','yes']
     on_off = ['off','on']
     a = doc.createElement('atom')
     a.setAttribute( 'id', str( self.id))
-    # charge
     if self.charge:
       a.setAttribute( "charge", str( self.charge))
-    #show attribute is set only when non default
-    if (self.show and self.symbol=='C') or (not self.show and self.symbol!='C'): 
-      a.setAttribute('show', yes_no[ self.show])
+    if (bool(self.show) and self.symbol=='C') or (not bool(self.show) and self.symbol!='C'): 
+      a.setAttribute('show', yes_no[ int(self.show) ])
     if self.show:
-      a.setAttribute( 'pos', self.pos)
+      a.setAttribute( 'pos', str(self.pos))
     if self.font_size != self.paper.standard.font_size \
        or self.font_family != self.paper.standard.font_family \
        or self.line_color != self.paper.standard.line_color:
-      font = dom_extensions.elementUnder( a, 'font', attributes=(('size', str( self.font_size)), ('family', self.font_family)))
+      font = dom_extensions.elementUnder( a, 'font', attributes=(('size', str( self.font_size)), ('family', str(self.font_family))))
       if self.line_color != self.paper.standard.line_color:
-        font.setAttribute( 'color', self.line_color)
-    a.setAttribute( 'name', self.symbol)
+        font.setAttribute( 'color', str(self.line_color))
+    
+    # Aseguramos limpieza total al guardar el atributo name
+    a.setAttribute( 'name', clean_text( self.symbol))
+    
     if self.show_hydrogens:
-      a.setAttribute('hydrogens', on_off[self.show_hydrogens])
+      a.setAttribute('hydrogens', on_off[ int(self.show_hydrogens) ])
     if self.area_color != self.paper.standard.area_color:
-      a.setAttribute( 'background-color', self.area_color)
-    # needed to support transparent handling of molecular size
+      a.setAttribute( 'background-color', str(self.area_color))
     x, y, z = map( Screen.px_to_text_with_unit, self.get_xyz( real=1))
     if self.z:
       dom_extensions.elementUnder( a, 'point', attributes=(('x', x), ('y', y), ('z', z)))
     else: 
       dom_extensions.elementUnder( a, 'point', attributes=(('x', x), ('y', y)))
-    # marks
     for o in self.marks:
       a.appendChild( o.get_package( doc))
-    # multiplicity
     if self.multiplicity != 1:
       a.setAttribute( 'multiplicity', str( self.multiplicity))
-    # valency
     a.setAttribute( 'valency', str( self.valency))
-    # number
     if self.number:
-      a.setAttribute( 'number', self.number)
+      a.setAttribute( 'number', str(self.number))
       a.setAttribute( 'show_number', data.booleans[ int( self.show_number)])
-    # free_sites
     if self.free_sites:
       a.setAttribute( 'free_sites', str( self.free_sites))
     return a
 
 
-
-
-
   def get_formula_dict( self):
-    """returns formula as dictionary that can
-    be passed to functions in periodic_table"""
+    """returns formula as dictionary"""
     ret = PT.formula_dict( self.symbol)
     if self.free_valency > 0:
       ret['H'] = self.free_valency
     return ret
 
 
-
-
-
-  # overrides special_parents.drawable_chem_vertex method
   def _set_mark_helper( self, mark, sign=1):
     drawable_chem_vertex._set_mark_helper( self, mark, sign=sign)
-    mark, _ = self._mark_to_name_and_class( mark)
-    if mark == 'plus':
+    mark_name, _ = self._mark_to_name_and_class( mark)
+    if mark_name == 'plus':
       self.charge += 1*sign
-    elif mark == 'minus':
+    elif mark_name == 'minus':
       self.charge -= 1*sign
-    elif mark == "radical":
+    elif mark_name == "radical":
       self.multiplicity += 1*sign
-    elif mark == "biradical":
+    elif mark_name == "biradical":
       self.multiplicity += 2*sign
     
-
-
 
   def update_after_valency_change( self):
     if self.free_valency <= 0:
@@ -512,11 +508,9 @@ class atom( drawable_chem_vertex, oasa.atom):
       self.redraw()
 
 
-
-
   def __str__( self):
-    return self.id
-
+    # Fix para ID como bytes en Py3
+    return str(clean_text( self.id))
 
 
   def get_charge_from_marks( self):
@@ -527,9 +521,6 @@ class atom( drawable_chem_vertex, oasa.atom):
       elif m.__class__.__name__ == "minus":
         res -= 1
     return res
-
-
-
 
 
   def generate_marks_from_cheminfo( self):
@@ -543,44 +534,33 @@ class atom( drawable_chem_vertex, oasa.atom):
       self.create_mark( 'biradical', draw=0)
   
 
-
-
-
   def set_valency_from_name( self):
     for val in PT.periodic_table[ self.symbol]['valency']:
       self.valency = val
       try:
         fv = self.free_valency
       except:
-        return  # this happens on read
+        return
       if fv >= 0:
         return
 
     
 
   def bbox( self, substract_font_descent=False):
-    """returns the bounding box of the object as a list of [x1,y1,x2,y2]"""
     if self.show:
       return drawable_chem_vertex.bbox( self, substract_font_descent=substract_font_descent)
     else:
       if self.item:
         return self.paper.bbox( self.item)
       else:
-        # we have to calculate it, the atoms was not drawn yet
         return self.x, self.y, self.x, self.y
 
 
 
-  ##LOOK  (make static)
   def split_element_and_charge( self, txt):
-    """returns tuple of (element, charge) or None if the text does not match this pattern"""
-    ### this could be a static method
-    # Handle both string and bytes input
-    if isinstance(txt, bytes):
-      txt = txt.decode('utf-8')
-    
-    splitter = re.compile("^([a-z]+)([0-9]*)([+-]?)$")
-    matcher = re.compile( "^([a-z]+)([0-9]*[+-])?$")
+    txt = clean_text( txt)
+    splitter = re.compile("^([a-zA-Z]+)([0-9]*)([+-]?)$")
+    matcher = re.compile( "^([a-zA-Z]+)([0-9]*[+-])?$")
     if not matcher.match( txt.lower()):
       return None
     match = splitter.match( txt.lower())
@@ -599,5 +579,4 @@ class atom( drawable_chem_vertex, oasa.atom):
 
 
   def after_undo( self):
-    """this is run after undo"""
     self._clean_cache()

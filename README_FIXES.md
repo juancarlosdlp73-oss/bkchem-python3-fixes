@@ -50,6 +50,21 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 
 * Chemical Data Persistence: Optimized the reading of native .cdml files. Using this format ensures all atomic information, bonds, and arrows are correctly recovered thanks to the new stability patches.
 
+### 10. Template System & Metadata Validation
+
+* Fixed Save-As-Template Error: Resolved the "1 molecule have no template atom specified" error that blocked users from creating custom templates.
+
+* Metadata Injection: Implemented the mark_as_template_selected method in main.py, which physically links atoms and bonds to the molecule's template_atom and template_bond properties.
+
+* ID Normalization: Added a cleaning layer for Atom/Bond IDs to ensure they are stored as pure strings, allowing the internal validator to correctly match markers during the save process.
+
+### 11. XML Serialization & "Deep Clean" Engine
+
+* Byte-Prefix Removal: Created a recursive DOM sanitizer (sanitize_node) that runs before saving any CDML file. This eliminates the nested b'...' literals in chemical labels (e.g., saving CH2OH instead of b'CH2OH').
+
+* Binary Mode Writing: Switched the CDML export logic to use binary mode (wb) with explicit UTF-8 encoding, preventing serialization crashes in Python 3.12's minidom implementation.
+
+* Graphic Refresh Fix: Added explicit .draw() calls to the template markers to ensure the visual feedback (red/blue circles) appears immediately on the canvas.
 
 ---
 
@@ -103,15 +118,54 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 
 * Persistencia de Datos Químicos: Optimización de la lectura de archivos nativos .cdml. Al usar este formato, se garantiza que toda la información atómica, enlaces y flechas se recuperen correctamente gracias a los nuevos parches de estabilidad.
 
+10. Template System & Metadata Validation
+
+Fixed Save-As-Template Error: Resolved the "1 molecule have no template atom specified" error that blocked users from creating custom templates.
+
+Metadata Injection: Implemented the mark_as_template_selected method in main.py, which physically links atoms and bonds to the molecule's template_atom and template_bond properties.
+
+ID Normalization: Added a cleaning layer for Atom/Bond IDs to ensure they are stored as pure strings, allowing the internal validator to correctly match markers during the save process.
+
+11. XML Serialization & "Deep Clean" Engine
+
+Byte-Prefix Removal: Created a recursive DOM sanitizer (sanitize_node) that runs before saving any CDML file. This eliminates the nested b'...' literals in chemical labels (e.g., saving CH2OH instead of b'CH2OH').
+
+Binary Mode Writing: Switched the CDML export logic to use binary mode (wb) with explicit UTF-8 encoding, preventing serialization crashes in Python 3.12's minidom implementation.
+
+Graphic Refresh Fix: Added explicit .draw() calls to the template markers to ensure the visual feedback (red/blue circles) appears immediately on the canvas.
+
+...
+
+### 10. Sistema de Plantillas y Validación de Metadatos
+
+* Corrección de Error de Guardado: Se eliminó el error "1 molecule have no template atom specified" que impedía crear plantillas personalizadas.
+
+* Inyección de Metadatos: Se implementó el método mark_as_template_selected en main.py, que vincula físicamente los átomos y enlaces a las propiedades de la molécula padre.
+
+* Normalización de IDs: Se añadió una capa de limpieza para los IDs de Átomos y Enlaces, garantizando que se almacenen como texto puro para que el validador interno los reconozca sin errores.
+
+### 11. Serialización XML y Motor de "Limpieza Profunda"
+
+* Eliminación de Prefijos b': Se creó un saneador recursivo de DOM (sanitize_node) que se ejecuta antes de guardar cualquier archivo CDML. Esto elimina los literales b'...' en las etiquetas químicas (ej: guarda CH2OH en lugar de b'CH2OH').
+
+* Escritura en Modo Binario: Se cambió la lógica de exportación CDML para usar el modo binario (wb) con codificación UTF-8, evitando fallos de serialización en la implementación de minidom de Python 3.12.
+
+* Corrección de Refresco Gráfico: Se añadieron llamadas explícitas a .draw() en los marcadores de plantilla para asegurar que el feedback visual (círculos rojo/azul) aparezca inmediatamente en el lienzo.
+
 ---
 ###  Modified Files / Archivos Modificados:
-* bkchem/xml_writer.py
-* bkchem/paper.py (Viewport Fix)
-* bkchem/export.py
-* bkchem/main.py (Double-click Fix)
-* bkchem/classes.py
-* bkchem/arrow.py (Arrow Stability Fix)
-* bkchem/start_bkchem.py
-* bkchem/pixmaps/
+
+* bkchem/xml_writer.py (SVG Subscripts & Binary CDML Export)
+* bkchem/paper.py (Viewport & Auto-Crop Fix)
+* bkchem/export.py (Smart Directory Paths)
+* bkchem/main.py (Double-click, Template Logic & XML Sanitizer)
+* bkchem/classes.py (Text Tool & Unicode/Str Migration)
+* bkchem/atom.py (Symbol Cleaning & Validation Shield)
+* bkchem/molecule.py (Validation Shield & Template Properties)
+* bkchem/special_parents.py (Group Editing Stability Shield)
+* bkchem/ftext.py (Chemical Label Byte-Cleaning)
+* bkchem/arrow.py (Arrow Scaling Stability Fix)
+* bkchem/start_bkchem.py (Desktop Launcher & Auto-Path)
+* bkchem/pixmaps/ (UI Icons & Path Asset Fix)
 
 Maintained and repaired in 2026. / Mantenido y reparado en 2026.

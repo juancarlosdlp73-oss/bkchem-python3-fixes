@@ -112,26 +112,11 @@ class group( drawable_chem_vertex):
 
 
   # xml_ftext (override drawable_chem_vertex.xml_ftext)
-  def _get_xml_ftext( self):
-    if self.group_type == "builtin":
-      if self.pos == 'center-first':
-        return GT.groups_table[ self.symbol.lower()]['textf']
-      else:
-        return GT.groups_table[ self.symbol.lower()]['textb']
-    elif self.group_type in ("implicit","chain"):
-      symbol_text = self.symbol
-      if isinstance(symbol_text, bytes):
-        symbol_text = symbol_text.decode('utf-8')
-      x = re.sub( "\d+", '<sub>\g<0></sub>', symbol_text)
-      x = re.sub( "[+-]", '<sup>\g<0></sup>', x)
-      if self.paper.get_paper_property('use_real_minus'):
-        x = re.sub("-", chr(8722), x)
-      return x
-
-
-  xml_ftext = property( _get_xml_ftext, None, None, "the text used for rendering using the ftext class")
-
-
+  def _get_xml_ftext( self ):
+    # Volvemos a la base: sin etiquetas, sin bytes, sin errores.
+    if isinstance( self.symbol, bytes):
+      return self.symbol.decode('utf-8')
+    return str(self.symbol)
 
 
   ## JUST TO MIMICK ATOM

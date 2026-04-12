@@ -60,6 +60,7 @@ from .singleton_store import Store, Screen
 from . import oasa
 from . import molecule
 
+#Nuevas librerías que añado
 
 
 class BKChem( Tk):
@@ -87,6 +88,94 @@ class BKChem( Tk):
       file_to_open = sys.argv[1]
       # Esperamos 200ms para que la interfaz se cargue antes de abrir el archivo
       self.after( 200, lambda: self.load_CDML( file_to_open))
+
+  def mark_as_template_selected(self):
+    """
+    Marca los objetos seleccionados como guías de plantilla.
+    Asegura la vinculación tanto en memoria como en los atributos de exportación XML,
+    limpiando cualquier residuo de bytes (b') para evitar errores en Python 3.
+    Fuerza el redibujado de los objetos para mostrar el círculo de color.
+    """
+    
+    def clean_id(identifier):
+        """Asegura que el ID sea una cadena de texto limpia"""
+        if isinstance(identifier, bytes):
+            return identifier.decode('utf-8', 'ignore')
+        s = str(identifier)
+        if len(s) >= 3 and s.startswith("b") and s[1] in ("'", '"') and s.endswith(s[1]):
+            return s[2:-1]
+        return s
+
+    if not self.paper or not self.paper.selected:
+      print("DEBUG: No has seleccionado nada en el lienzo.")
+      return
+
+    found_atom = False
+    found_bond = False
+
+    for o in self.paper.selected:
+      # --- SECCIÓN ÁTOMO (Punto de anclaje) ---
+      if hasattr(o, 'is_template_atom'):
+        mol = o.parent
+        # 1. Vínculo de objeto (para validación en memoria)
+        mol.template_atom = o
+        
+        # 2. Vínculo de atributo (para el escritor de archivos XML/CDML)
+        if not hasattr(mol, 'attributes'):
+            mol.attributes = {}
+        
+        clean_oid = clean_id(o.id)
+        mol.attributes['template_atom'] = clean_oid
+        
+        # 3. Marca visual y REDIBUJADO FORZADO
+        # Primero limpiamos marcas antiguas en la misma molécula
+        for at in mol.atoms:
+            if at.is_template_atom:
+                at.is_template_atom = 0
+                at.draw() # Borra el círculo viejo
+        
+        # Marcamos el nuevo y lo redibujamos
+        o.is_template_atom = 1
+        o.draw() # Dibuja el círculo nuevo (rojo/azul)
+        
+        found_atom = True
+        print(f"DEBUG: Átomo '{clean_oid}' registrado y dibujado como guía en '{mol.name}'")
+
+      # --- SECCIÓN ENLACE (Ángulo de rotación) ---
+      elif hasattr(o, 'is_template_bond'):
+        mol = o.parent
+        # 1. Vínculo de objeto
+        mol.template_bond = o
+        
+        # 2. Vínculo de atributo XML
+        if not hasattr(mol, 'attributes'):
+            mol.attributes = {}
+        
+        clean_oid = clean_id(o.id)
+        mol.attributes['template_bond'] = clean_oid
+            
+        # 3. Marca visual y REDIBUJADO FORZADO
+        for bo in mol.bonds:
+            if bo.is_template_bond:
+                bo.is_template_bond = 0
+                bo.draw() # Limpia resaltado viejo
+                
+        o.is_template_bond = 1
+        o.draw() # Resalta el enlace guía
+        
+        found_bond = True
+        print(f"DEBUG: Enlace '{clean_oid}' registrado y dibujado como guía")
+
+    if found_atom or found_bond:
+      # Avisamos al papel de que el documento ha cambiado
+      self.paper.changes_made = 1
+      # Refresco global del canvas para asegurar la visibilidad
+      if hasattr(self.paper, 'display'):
+          self.paper.display()
+      elif hasattr(self.paper, 'redraw'):
+          self.paper.redraw()
+    else:
+      print("DEBUG: La selección actual no es un átomo ni un enlace válido para plantilla.")
 
   def initialize( self):
     self.in_batch_mode = 0
@@ -241,6 +330,29 @@ class BKChem( Tk):
         lambda : self.paper.swap_sides_of_selected('horizontal'), 'selected_mols'),
       ( _("Object"), 'separator'),
       ( _("Object"), 'command', _('Configure'), 'Mouse-3', _("Set the properties of the object, such as color, font size etc."), lambda : self.paper.config_selected(), 'selected'),
+      
+      # --- ESTA ES LA FUNCIÓN QUE CORRIGE EL ERROR DE VALIDACIÓN ---
+      ( _("Object"), 'command', _('Mark as template'), None, _("Mark selected as template atom/bond"), 
+        lambda : ( 
+            # 1. Procesar Átomos: vincula el objeto a mol.template_atom
+            [ ( setattr(o.parent, 'template_atom', o), 
+                [setattr(at, 'is_template_atom', 0) for at in o.parent.atoms], 
+                setattr(o, 'is_template_atom', 1),
+                print(f"DEBUG: Átomo {o.id} vinculado a la molécula {o.parent.name}") )
+              for o in self.paper.selected if hasattr(o, 'is_template_atom') ],
+            
+            # 2. Procesar Enlaces: vincula el objeto a mol.template_bond
+            [ ( setattr(o.parent, 'template_bond', o), 
+                [setattr(bo, 'is_template_bond', 0) for bo in o.parent.bonds], 
+                setattr(o, 'is_template_bond', 1),
+                print(f"DEBUG: Enlace {o.id} vinculado como guía de rotación") )
+              for o in self.paper.selected if hasattr(o, 'is_template_bond') ],
+            
+            # 3. Marcar que hubo cambios para que el validador se active
+            setattr(self.paper, 'changes_made', 1)
+        ), 'selected'),
+
+
       #( _("Object"), 'separator')
 
       # chemistry menu
@@ -800,15 +912,15 @@ class BKChem( Tk):
     name = self.paper.file_name['name']
     
     # 2. Abrimos el diálogo apuntando a esa carpeta
-    a = asksaveasfilename( defaultextension = ".svg", 
+    a = asksaveasfilename( defaultextension = ".cdml", # <-- CAMBIADO A .CDML
                            initialdir = dir, 
                            initialfile = name,
                            title = _("Save As..."), 
                            parent = self,
-                           filetypes=((_("CD-SVG file"),".svg"),
-                                      (_("Gzipped CD-SVG file"),".svgz"),
-                                      (_("CDML file"),".cdml"),
-                                      (_("Gzipped CDML file"),".cdgz")))
+                           filetypes=((_("CDML file"),".cdml"), # <-- SUBIDO AL PRIMER PUESTO
+                                      (_("Gzipped CDML file"),".cdgz"),
+                                      (_("CD-SVG file"),".svg"),
+                                      (_("Gzipped CD-SVG file"),".svgz")))
     
     if a != '' and a!=():
       if self._save_according_to_extension( a):
@@ -828,30 +940,99 @@ class BKChem( Tk):
 
 
   def _save_according_to_extension( self, filename, update_default_dir=1):
-    """decides the format from the file extension and saves self.paper in it"""
+    """
+    Función de guardado robusta para Python 3.12+.
+    Limpia el documento de objetos 'bytes' y de representaciones literales anidadas b'...'
+    antes de serializar para evitar errores y caracteres no deseados en la glucosa.
+    """
+    import os
     save_dir, save_file = os.path.split( filename)
     if update_default_dir:
       self.save_dir = save_dir
-    ext = os.path.splitext( filename)[1]
-    if ext == '.cdgz':
-      type = _('gzipped CDML')
-      success = export.export_CDML( self.paper, filename, gzipped=1)
-    elif ext == '.cdml':
-      type = _('CDML')
-      success = export.export_CDML( self.paper, filename, gzipped=0)        
-    elif ext == '.svgz':
-      type = _('gzipped CD-SVG')
-      success = export.export_CD_SVG( self.paper, filename, gzipped=1)
+    
+    ext = os.path.splitext( filename)[1].lower()
+    
+    if ext == '.cdml':
+      try:
+        # 1. Obtenemos el paquete de datos (objeto DOM)
+        doc = self.paper.get_package()
+        
+        if doc is None:
+            return 0
+
+        # --- LIMPIADOR ULTRA-AGRESIVO PARA ELIMINAR LAS "b" ANIDADAS ---
+        
+        def deep_clean_b(val):
+            """Elimina todas las capas de b' o b\" que envuelven el texto"""
+            if not isinstance(val, str):
+                return val
+            
+            last_val = ""
+            current = val.strip()
+            
+            # Bucle para pelar capas como b'b"b\'CH2OH\'"'
+            while current != last_val:
+                last_val = current
+                # Eliminar b'...'
+                if len(current) >= 3 and current.startswith("b") and current[1] in ("'", '"') and current[-1] == current[1]:
+                    current = current[2:-1]
+                # Eliminar b\'...\' (escapadas)
+                elif len(current) >= 4 and current.startswith("b\\") and current[2] in ("'", '"') and current[-1] == current[2]:
+                    current = current[3:-1]
+                # Eliminar comillas residuales al inicio/final
+                elif len(current) >= 2 and current[0] in ("'", '"') and current[-1] == current[0]:
+                    current = current[1:-1]
+                    
+            return current
+
+        def sanitize_node(node):
+            # 1. Limpiar atributos (como el 'name' de los átomos o grupos)
+            if node.nodeType == node.ELEMENT_NODE:
+                attrs = node.attributes
+                if attrs:
+                    for i in range(attrs.length):
+                        attr = attrs.item(i)
+                        if isinstance(attr.value, bytes):
+                            attr.value = attr.value.decode('utf-8', 'ignore')
+                        attr.value = deep_clean_b(attr.value)
+            
+            # 2. Limpiar el contenido de texto (importante para CH2OH)
+            for child in node.childNodes:
+                if child.nodeType == child.TEXT_NODE:
+                    if isinstance(child.data, bytes):
+                        child.data = child.data.decode('utf-8', 'ignore')
+                    # Aquí es donde quitamos la b de b'CH2OH'
+                    child.data = deep_clean_b(child.data)
+                
+                # 3. Recursión para entrar en sub-nodos (como <sub> o <ftext>)
+                sanitize_node(child)
+        
+        # Ejecutamos la limpieza total
+        sanitize_node(doc)
+        # ---------------------------------------------------------------
+
+        # 2. Abrimos en modo binario 'wb'
+        with open(filename, 'wb') as f:
+            # 3. Al haber saneado el documento, toxml ya no fallará y el texto irá limpio
+            f.write(doc.toxml(encoding='utf-8'))
+        
+        success = True
+      except Exception as e:
+        import traceback
+        print("Error al intentar guardar el archivo CDML:", e)
+        traceback.print_exc()
+        success = False
     else:
-      type = _('CD-SVG')
-      success = export.export_CD_SVG( self.paper, filename, gzipped=0)
+      # Manejo de formatos comprimidos (como cdgz)
+      from . import export
+      success = export.export_CDML( self.paper, filename, gzipped=(ext == '.cdgz'))
+
     if success:
-      Store.log( _("saved to %s file: %s") % (type, os.path.abspath( os.path.join( save_dir, save_file))))
-      self._record_recent_file( os.path.abspath( os.path.join( save_dir, save_file)))
       self.paper.changes_made = 0
+      self.update_status("Guardado correctamente: " + save_file)
       return 1
     else:
-      Store.log( _("failed to save to %s file: %s") % (type, save_file))
+      self.update_status("Error durante el guardado")
       return 0
 
 
