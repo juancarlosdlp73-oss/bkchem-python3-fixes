@@ -66,6 +66,9 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 
 * Graphic Refresh Fix: Added explicit .draw() calls to the template markers to ensure the visual feedback (red/blue circles) appears immediately on the canvas.
 
+### 12. Default Values: Startup Arrow Tool and Safe Scaling Settings.
+
+* Upon starting BKChem, the selection arrow is now chosen by default. Additionally, all checkboxes in the scaling dialog that previously triggered unstable modifications are now unchecked by default.
 ---
 
 #  BKChem - Versión Corregida por JuanCarlos (Python 3.12)
@@ -118,23 +121,6 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 
 * Persistencia de Datos Químicos: Optimización de la lectura de archivos nativos .cdml. Al usar este formato, se garantiza que toda la información atómica, enlaces y flechas se recuperen correctamente gracias a los nuevos parches de estabilidad.
 
-10. Template System & Metadata Validation
-
-Fixed Save-As-Template Error: Resolved the "1 molecule have no template atom specified" error that blocked users from creating custom templates.
-
-Metadata Injection: Implemented the mark_as_template_selected method in main.py, which physically links atoms and bonds to the molecule's template_atom and template_bond properties.
-
-ID Normalization: Added a cleaning layer for Atom/Bond IDs to ensure they are stored as pure strings, allowing the internal validator to correctly match markers during the save process.
-
-11. XML Serialization & "Deep Clean" Engine
-
-Byte-Prefix Removal: Created a recursive DOM sanitizer (sanitize_node) that runs before saving any CDML file. This eliminates the nested b'...' literals in chemical labels (e.g., saving CH2OH instead of b'CH2OH').
-
-Binary Mode Writing: Switched the CDML export logic to use binary mode (wb) with explicit UTF-8 encoding, preventing serialization crashes in Python 3.12's minidom implementation.
-
-Graphic Refresh Fix: Added explicit .draw() calls to the template markers to ensure the visual feedback (red/blue circles) appears immediately on the canvas.
-
-...
 
 ### 10. Sistema de Plantillas y Validación de Metadatos
 
@@ -152,6 +138,9 @@ Graphic Refresh Fix: Added explicit .draw() calls to the template markers to ens
 
 * Corrección de Refresco Gráfico: Se añadieron llamadas explícitas a .draw() en los marcadores de plantilla para asegurar que el feedback visual (círculos rojo/azul) aparezca inmediatamente en el lienzo.
 
+### 12. Valores por defecto: Flecha al inicio y valores de escalado seguros.
+* Al iniciar BKChem selecciona la flecha por defecto y al escalar, , están desmarcados toas las pestañas que hacian las modificaciones más inseguras"
+
 ---
 ###  Modified Files / Archivos Modificados:
 
@@ -167,5 +156,6 @@ Graphic Refresh Fix: Added explicit .draw() calls to the template markers to ens
 * bkchem/arrow.py (Arrow Scaling Stability Fix)
 * bkchem/start_bkchem.py (Desktop Launcher & Auto-Path)
 * bkchem/pixmaps/ (UI Icons & Path Asset Fix)
+* bkchem/dialogs.py
 
 Maintained and repaired in 2026. / Mantenido y reparado en 2026.
