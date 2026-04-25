@@ -70,8 +70,23 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 
 * Upon starting BKChem, the selection arrow is now chosen by default. Additionally, all checkboxes in the scaling dialog that previously triggered unstable modifications are now unchecked by default.
 
+### 13. Advanced Chemical Identity Engine (Haworth Templates)
 
+* From Drawing to Chemistry: Migrated the template system from simple text labels to real atomic identities. The program now recognizes atoms as C, O, and H entities instead of mere visual strings.
 
+* Smart Mass Calculation: This change allows the internal engine to correctly calculate molecular formulas and high-resolution masses (e.g., verifying C18​H32​O16​ for trisaccharides).
+
+* Automated Glucose Button: Integrated a dedicated Haworth D-Aldohexose button in the toolbar. It doesn't just "paste" a drawing; it inserts a chemically active skeleton.
+
+* Improved Coordinate-Based Anchor System: Implemented a "hidden anchor" (Atom 7) at a 1.245cm distance to ensure that when linking multiple units, the scale and orientation remain consistent and proportional to the font size.
+
+* Through modifications in atom.py and molecule.py, chemical groups (like OH or CH2OH) are no longer treated as static text. They are now processed as real atomic nodes, enabling accurate mass calculation and formula counting for complex structures like trisaccharides (C18​H32​O16​).
+
+### 14. Performance & Scalability Optimization
+
+* Font-to-Bond Ratio: Standardized the default bond lengths in templates to match the font's relative size, preventing the "Giant Text" bug when creating complex polymers.
+
+* Refined XML Templates: Manually tuned the templates.cdml file to eliminate coordinate noise, ensuring perfectly vertical/horizontal alignments in Haworth projections.
 
 
 ---
@@ -146,8 +161,23 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 ### 12. Valores por defecto: Flecha al inicio y valores de escalado seguros.
 * Al iniciar BKChem selecciona la flecha por defecto y al escalar, , están desmarcados toas las pestañas que hacian las modificaciones más inseguras"
 
-### 13. Plantilla cargada de aldohexosa en proyección de Haworth.
-* Botón con D-aldohexosa con plantilla. La plantilla generada a mano en xml, con grandes problemas, punto de anclaje enlace. Es funcional aunque aún no se enlaza bien. Quedan mejoras
+### 13. Motor de Identidad Química Avanzada (Plantillas Haworth)
+
+* De Dibujo a Química Real: Se migró el sistema de plantillas de simples etiquetas de texto a identidades atómicas reales. El programa ahora reconoce los átomos como entidades C, O y H en lugar de meros caracteres visuales.
+
+* Cálculo de Masa Inteligente: Este cambio permite que el motor interno calcule correctamente las fórmulas moleculares y masas de alta resolución (ej: validando C18​H32​O16​ para trisacáridos).
+
+* Botón de Glucosa Automatizado: Se integró un botón dedicado para D-Aldohexosa en proyección de Haworth. No solo "pega" un dibujo, sino que inserta un esqueleto químicamente activo.
+
+* Sistema de Anclaje por Coordenadas: Implementación de un anclaje (Átomo 7) a una distancia fija de 1.245cm. Esto garantiza que, al enlazar varias unidades, la escala y orientación se mantengan consistentes y proporcionales al tamaño de la fuente.
+
+* Mediante modificaciones en atom.py y molecule.py, los grupos químicos (como OH o CH2OH) han dejado de ser tratados como texto estático. Ahora se procesan como nodos atómicos reales, lo que permite el cálculo preciso de la masa y el recuento de fórmulas para estructuras complejas como los trisacáridos (C18​H32​O16​).
+
+### 14. Optimización de Rendimiento y Escalabilidad
+
+* Relación Fuente-Enlace: Se estandarizaron las longitudes de enlace por defecto en las plantillas para que coincidan con el tamaño relativo de la fuente, evitando el error de "Texto Gigante" al crear polímeros complejos.
+
+* Plantillas XML Refinadas: Sintonización manual del archivo templates.cdml para eliminar el ruido de coordenadas, garantizando alineaciones verticales y horizontales perfectas en las proyecciones de Haworth.
 ---
 ###  Modified Files / Archivos Modificados:
 

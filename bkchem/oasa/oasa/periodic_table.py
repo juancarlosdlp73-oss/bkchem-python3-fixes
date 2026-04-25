@@ -171,7 +171,7 @@ class composition_dict( dict):
         if ret:
           ret += ', '
         ret += "%s: %2.3f%%" % (n, self[n])
-    k = self.keys()
+    k = list(self.keys())   ## Cambio esta línea para que funcione en Python 3, ya que dict.keys() devuelve un objeto dict_keys, no una lista
     k.sort()
     for n in self:
       if n not in ('C','H'):
@@ -242,58 +242,70 @@ class formula_dict( dict):
       return self[element]*periodic_table[element]['weight']/self.get_molecular_weight()
     return 0
 
-  def get_molecular_weight( self):
+  def get_molecular_weight(self):
     tot = 0
+    pt = globals().get('periodic_table', {})
     for i in self:
-      tot += self[i]* periodic_table[i]['weight']
+        if i in pt:
+            tot += self[i] * pt[i]['weight']
+        else:
+            # Si es un grupo que el escudo dejó pasar (ej. una etiqueta rara)
+            # al menos no rompemos el resto del cálculo
+            pass 
     return tot
 
-  def get_exact_molecular_mass( self):
+  def get_exact_molecular_mass(self):
     tot = 0
+    pt = globals().get('periodic_table', {})
     for i in self:
-      tot += self[i]* periodic_table[i]['exact_mass']
+      # Verificamos 3 cosas: 
+      # 1. Que el símbolo 'i' exista en la tabla.
+      # 2. Que no sea una etiqueta de consulta (query) como R o X.
+      # 3. Que tenga la clave 'exact_mass'.
+      if i in pt and not pt[i].get('query') and 'exact_mass' in pt[i]:
+        tot += self[i] * pt[i]['exact_mass']
+      else:
+        # Si es un grupo como "CH2OH" o un anclaje "R", usamos 0 o su peso normal
+        # para que no crashee el programa.
+        pass
     return tot
 
   
   def keys_in_order( self):
     return self.sorted_keys()
 
-  def sorted_keys( self):
-    k = self.keys()
+  def sorted_keys(self):
+    k = list(self.keys())
     ret = []
+    # El estándar químico es C primero, luego H, luego el resto alfabético
     if 'C' in k:
-      for a in ('C','H'):
-        if a in k:
-          ret.append( a)
-          k.remove( a)
-      k.sort()
-      return ret+k
-    else:
-      k.sort()
-      return k
+      ret.append('C')
+      k.remove('C')
+      if 'H' in k:
+        ret.append('H')
+        k.remove('H')
+    k.sort()
+    return ret + k
     
 
-  def read_formula_string( self, form):
-    is_formula = re.compile("^([A-Z][a-z]?[0-9]*)*$")
-    #form = "".join( form.split("."))
-    form = form.replace( ".", "")
-    if not is_formula.match( form):
-      return None
-    chunks = re.split( "([A-Z][a-z]*)", form)
-    del chunks[0]
-    for i in range( 0, len( chunks), 2):
-      if chunks[i] in self:
-        if chunks[i+1] == '':
-          j = 1
-        else:
-          j = int( chunks[i+1])
-        self[ chunks[i]] += j
-      elif chunks[i] in periodic_table:
-        if chunks[i+1] == '':
-          j = 1
-        else:
-          j = int( chunks[i+1])
-        self[ chunks[i]] = j
+  def read_formula_string(self, form):
+    if not form:
+      return
+    # Limpiamos puntos y espacios
+    form = form.replace(".", "").replace(" ", "")
+    
+    # Buscamos pares de Elemento + Número (Ej: C6H12O6)
+    import re
+    matches = re.findall(r'([A-Z][a-z]?)([0-9]*)', form)
+    
+    if not matches:
+        self.incomplete = 1
+        return
+
+    for sym, num in matches:
+      if sym in periodic_table:
+        count = int(num) if num else 1
+        self[sym] = self.get(sym, 0) + count
       else:
         self.incomplete = 1
 

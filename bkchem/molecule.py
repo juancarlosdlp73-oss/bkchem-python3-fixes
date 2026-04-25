@@ -130,12 +130,41 @@ class molecule( container, top_level, id_enabled, oasa.molecule, with_paper):
   def create_vertex( self, vertex_class=None):
     if not vertex_class:
       vertex_class = atom
-    std = self.paper and self.paper.standard or Store.app.paper.standard
-    return vertex_class( standard=std)
-
+    
+    # 1. Buscamos la configuración estándar de forma segura para Python 3
+    std = None
+    if self.paper and hasattr(self.paper, 'standard'):
+      std = self.paper.standard
+    elif hasattr(Store, 'app') and Store.app.paper and hasattr(Store.app.paper, 'standard'):
+      std = Store.app.paper.standard
+    
+    # 2. Creamos la instancia del átomo
+    v = vertex_class( standard=std, molecule=self)
+    
+    # 3. FORZAMOS VISIBILIDAD (Esto arregla SMILES y la Conversión Lineal)
+    # Al nacer con show=1 y show_hydrogens=1, evitamos que sean invisibles
+    if hasattr(v, 'show'):
+        v.show = 1
+    if hasattr(v, 'show_hydrogens'):
+        v.show_hydrogens = 1
+    
+    # 4. Despertamos al átomo para que calcule su química inmediatamente
+    if hasattr(v, 'raise_valency_to_senseful_value'):
+        try:
+            v.raise_valency_to_senseful_value()
+        except:
+            pass
+            
+    return v
 
   def create_edge( self):
-    std = self.paper and self.paper.standard or Store.app.paper.standard
+    # --- REPARACIÓN DE SEGURIDAD PARA PYTHON 3 ---
+    std = None
+    if self.paper and hasattr(self.paper, 'standard'):
+      std = self.paper.standard
+    elif hasattr(Store, 'app') and Store.app.paper and hasattr(Store.app.paper, 'standard'):
+      std = Store.app.paper.standard
+      
     return bond( standard=std)
 
 

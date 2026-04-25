@@ -20,7 +20,8 @@
 
 """home for atom class"""
 
-
+import sys
+import os
 from warnings import warn
 from . import dom_extensions
 import operator
@@ -34,6 +35,7 @@ from . import debug
 from . import oasa
 from .singleton_store import Screen, Store
 from functools import reduce
+from bkchem.oasa import periodic_table as PT
 
 
 def clean_text( t):
@@ -205,42 +207,34 @@ class atom( drawable_chem_vertex, oasa.atom):
 
 
   # xml_ftext (override drawable_chem_vertex.xml_ftext)
-  def _get_xml_ftext( self):
-    # Forzamos limpieza del símbolo para el renderizado
-    ret = clean_text( self.symbol)
+  def _get_xml_ftext(self):
+    """Genera el texto con subíndices y carga para el dibujo."""
+    import re
     
-    if not self.pos:
-      self.decide_pos()
-    # hydrogens
-    if self.show_hydrogens:
-      v = self.free_valency
-      if v:
-        h = 'H'
-      else:
-        h = ''
-      if v > 1:
-        h += '<sub>%d</sub>' % v
-      if self.pos == 'center-last':
-        ret = h + ret
-      else:
-        ret = ret + h
-    # charge
+    # 1. Prioridad: ¿Tiene un nombre especial (Alias)?
+    if hasattr(self, '_name_alias') and self._name_alias:
+        text = clean_text(self._name_alias)
+        # Convertimos números en subíndices (Ej: CH3 -> CH<sub>3</sub>)
+        ret = re.sub(r'(\d+)', r'<sub>\1</sub>', text)
+    else:
+        # 2. Si es un átomo normal (C, O, N...)
+        ret = clean_text(self.symbol)
+        if self.show_hydrogens:
+            v = self.free_valency
+            if v > 0:
+                h = 'H' + (f'<sub>{v}</sub>' if v > 1 else '')
+                # Decidimos si el H va a la izquierda o derecha
+                if not self.pos:
+                    self.decide_pos()
+                ret = h + ret if self.pos == 'center-last' else ret + h
+
+    # 3. Añadimos la carga (Si existe)
     diff = self.charge - self.get_charge_from_marks()
     if diff:
-      ch = ''
-      if abs( diff) > 1:
-        ch += str( abs( diff))
-      if diff > 0:
-        ch = '<sup>%s+</sup>' % ch
-      else:
-        minus = chr( 8722) if self.paper.get_paper_property( 'use_real_minus') else "-"
-        ch = '<sup>%s%s</sup>' % (ch, minus)
-    else:
-      ch = ''
-    if self.pos == 'center-last':
-      ret = ch + ret
-    else:
-      ret = ret + ch
+        ch_val = str(abs(diff)) if abs(diff) > 1 else ''
+        sign = '+' if diff > 0 else (chr(8722) if self.paper.get_paper_property('use_real_minus') else "-")
+        ret += f'<sup>{ch_val}{sign}</sup>'
+
     return ret
 
   xml_ftext = property( _get_xml_ftext, None, None, "the text used for rendering using the ftext class")
@@ -256,55 +250,70 @@ class atom( drawable_chem_vertex, oasa.atom):
       self.pos = "center-first"
   
 
-  def set_name( self, name, interpret=1, check_valency=1, occupied_valency=None):
-    name = clean_text( name)
-    ret = self._set_name( name, interpret=interpret, check_valency=check_valency, occupied_valency=occupied_valency)
-    self.set_valency_from_name()
-    self.update_after_valency_change()
-    return ret
+  def set_name(self, name, interpret=1, check_valency=1, occupied_valency=None):
+    name = clean_text(name)
+    self._name_alias = name
+    
+    try:
+        # 1. Intentamos la validación química real
+        # Si esto funciona, el átomo tendrá peso y valencia
+        ret = self._set_name(name, interpret=interpret, check_valency=check_valency, occupied_valency=occupied_valency)
+        
+        if ret:
+            # Si se reconoció como átomo, nos aseguramos de que NO sea tratado como texto inerte
+            self.is_text_only = False 
+            self.set_valency_from_name()
+            return True
+            
+    except Exception as e:
+        # Solo si falla catastróficamente imprimimos el error para saber qué pasó
+        print(f"DEBUG: Error en validación química de '{name}': {e}")
+
+    # 2. El "Escudo" (Fallback): Si no es un átomo reconocido, lo tratamos como texto
+    # Pero le asignamos una masa de 0 solo si realmente no hay otra opción
+    self.symbol = name 
+    self.show = 1
+    self.is_text_only = True
+    return True
 
 
   def _set_name( self, name, interpret=1, check_valency=1, occupied_valency=None):
     name = clean_text( name)
     self.charge = self.get_charge_from_marks()
     self.dirty = 1
-    if name.lower() != 'c':
-      self.show = 1
-    else:
+    
+    # 1. Caso especial: Carbono (no se muestra por defecto)
+    if name.lower() == 'c':
+      self.symbol = 'C'
       self.show = 0
-      
+      self._name_alias = None
+      return True
+
+    # 2. Intentar separar elemento y carga (Ej: Na+)
     elch = self.split_element_and_charge( name)
     if elch:
-      # name is element symbol + charge
       self.symbol = clean_text( elch[0])
-      #self.show_hydrogens = 0
       self.charge += elch[1]
+      self.show = 1
       return True
-    else:
-      # try if name is hydrogenated form of an element
-      form = PT.text_to_hydrogenated_atom( name)
-      if form:
-        # it is!
-        sym = clean_text( form.get('symbol'))
-        if not sym:
-            a = list(PT.periodic_table.keys())
-            if 'H' in a:
-                a.remove('H')
-            sym = a[0] if a else 'C'
+
+    # 3. REPARACIÓN PARA PYTHON 3: Forzar reconocimiento del símbolo
+    # Buscamos el primer símbolo químico válido en el texto (Ej: "OH" -> "O")
+    match = re.search(r'([A-Z][a-z]?)', name)
+    if match:
+        main_symbol = match.group(1)
+        if main_symbol in PT.periodic_table:
+            # ESTA LÍNEA ES LA CLAVE: actualizamos el símbolo base para que tenga peso
+            self.symbol = main_symbol 
+            self.show = 1
+            # Guardamos el texto completo para el dibujo (OH, CH2OH, etc.)
+            self._name_alias = name 
             
-        valency = self.occupied_valency if occupied_valency == None else occupied_valency
-        
-        if sym in PT.periodic_table and form['H'] in [i-valency+self.charge for i in PT.periodic_table[sym]['valency']]:
-          self.symbol = clean_text( sym)
-          self.show_hydrogens = 1
-          if occupied_valency:
-            self.pos = None
-          else:
-            if name.lower().find( "h") < name.lower().find( self.symbol.lower()):
-              self.pos = "center-last"
-            else:
-              self.pos = "center-first"
-          return True
+            # Limpiamos caché para que recalculé el peso molecular inmediatamente
+            if hasattr(self, '_clean_cache'):
+                self._clean_cache()
+            return True
+            
     return False
 
 
@@ -389,7 +398,7 @@ class atom( drawable_chem_vertex, oasa.atom):
       self.set_name( content, check_valency=0, interpret=0)
     else:
       self.set_name( clean_text( package.getAttribute( 'name')), check_valency=0)
-      
+      self._name_alias = clean_text( package.getAttribute( 'name'))
     # charge
     val_charge = clean_text( package.getAttribute('charge'))
     self.charge = int( val_charge or 0)
@@ -455,8 +464,11 @@ class atom( drawable_chem_vertex, oasa.atom):
       if self.line_color != self.paper.standard.line_color:
         font.setAttribute( 'color', str(self.line_color))
     
-    # Aseguramos limpieza total al guardar el atributo name
-    a.setAttribute( 'name', clean_text( self.symbol))
+    # REPARACIÓN: Guardamos el alias si existe, si no, el símbolo
+    if hasattr(self, '_name_alias') and self._name_alias:
+        a.setAttribute('name', clean_text(self._name_alias))
+    else:
+        a.setAttribute('name', clean_text(self.symbol))
     
     if self.show_hydrogens:
       a.setAttribute('hydrogens', on_off[ int(self.show_hydrogens) ])
@@ -479,13 +491,38 @@ class atom( drawable_chem_vertex, oasa.atom):
       a.setAttribute( 'free_sites', str( self.free_sites))
     return a
 
+  ##  VARIAS REPARACIONES
+  def get_formula_dict(self):
+    from .oasa import periodic_table as PT
+    print(f"DEBUG: Calculando formula para el atomo {self.symbol} con alias {getattr(self, '_name_alias', 'None')}")
+    res = {}
+    
+    # 1. ¿Qué texto tiene el átomo? (Ej: "OH", "CH2OH", "O", "C")
+    name = getattr(self, '_name_alias', None) or self.symbol
+    
+    # 2. Trituradora de texto: Extraemos TODO lo que parezca un elemento
+    import re
+    matches = re.findall(r'([A-Z][a-z]?)([0-9]*)', name)
+    
+    for sym, num in matches:
+        if sym in PT.periodic_table:
+            count = int(num) if num else 1
+            res[sym] = res.get(sym, 0) + count
 
-  def get_formula_dict( self):
-    """returns formula as dictionary"""
-    ret = PT.formula_dict( self.symbol)
-    if self.free_valency > 0:
-      ret['H'] = self.free_valency
-    return ret
+    # 3. SEGURIDAD: Si por alguna razón el nombre no dio resultado (ej: un símbolo raro)
+    # añadimos el símbolo base si no está ya en el diccionario.
+    if self.symbol not in res and self.symbol in PT.periodic_table:
+        res[self.symbol] = 1
+
+    # 4. HIDRÓGENOS AUTOMÁTICOS
+    # Solo sumamos de la valencia libre si NO hemos encontrado 'H' en el texto
+    # Esto evita que "OH" sume el H del texto + el H de valencia libre.
+    if 'H' not in res:
+        v = self.free_valency
+        if v > 0:
+            res['H'] = res.get('H', 0) + v
+            
+    return res
 
 
   def _set_mark_helper( self, mark, sign=1):

@@ -130,19 +130,25 @@ def oasa_mol_to_bkchem_mol( mol, paper):
   return m
 
 
-def oasa_atom_to_bkchem_atom( a, paper, m):
-  at = atom.atom( standard=paper.standard, molecule=m)
-  at.x = a.x
-  at.y = a.y
-  at.z = a.z
-  at.set_name( a.symbol, interpret=1)
-  at.charge = a.charge
-  at.number = a.properties_.get( 'inchi_number', None)
-  at.show_number = False
-  at.isotope = a.isotope
-  at.valency = a.valency
-  at.multiplicity = at.multiplicity
-  return at
+def oasa_atom_to_bkchem_atom(a, paper, m):
+    at = atom.atom(standard=paper.standard, molecule=m)
+    at.x, at.y, at.z = a.x, a.y, a.z
+    
+    # Si OASA devuelve un átomo simple tras expandir...
+    if len(a.symbol) <= 2 and not any(char.isdigit() for char in a.symbol):
+        at.symbol = a.symbol
+        at._name_alias = None # Borramos el texto para que no se solape
+        
+        if a.symbol == 'C':
+            at.show = 0  # <--- ESTO CREA EL ZIGZAG (Esconde la C y los H)
+        else:
+            at.show = 1  # Muestra O, N, etc.
+    else:
+        at.set_name(a.symbol, interpret=1)
+        at._name_alias = a.symbol
+    
+    at.charge = a.charge
+    return at
 
 def oasa_bond_to_bkchem_bond( b, paper):
   bo = bond.bond( standard=paper.standard)
@@ -165,23 +171,49 @@ def bkchem_mol_to_oasa_mol( mol):
     v2 = m.vertices[ mol.atoms.index( aa2)]
     b2.vertices = (v1, v2)
     m.add_edge( v1, v2, b2)
+    
+  # ESTO ES LO QUE DISPARA LA CONVERSIÓN LINEAL
+  try:
+    # Convierte el texto CH3CH2CH3 en una estructura de enlaces reales
+    m.expand_group_symbols()
+    # Genera las coordenadas para que los nuevos átomos no queden uno encima de otro
+    oasa.coords_generator.calculate_coords( m, force=1)
+  except:
+    pass
+    
   return m
 
 
 
 
 def bkchem_atom_to_oasa_atom( a):
-  s = a.symbol
+  if hasattr(a, '_name_alias') and a._name_alias:
+    s = a._name_alias
+  else:
+    s = a.symbol
+
+  # Si es un grupo largo, intentamos que OASA lo entienda
+  if len(s) > 2:
+    try:
+      ret_mol = oasa.smiles.text_to_mol( s)
+      if ret_mol and ret_mol.atoms:
+        res = ret_mol.atoms[0]
+        res.x, res.y, res.z = a.get_xyz()
+        return res
+    except:
+        pass
+
   ret = oasa.atom( symbol=s)
   x, y, z = a.get_xyz()
-  ret.x = x
-  ret.y = y
-  ret.z = z
+  ret.x, ret.y, ret.z = x, y, z
   ret.charge = a.charge
-  ret.multiplicity = a.multiplicity
-  ret.valency = a.valency
-  if hasattr(a,'isotope'):
-    ret.isotope = a.isotope
+  
+  # Ajuste de valencia inteligente
+  if s == 'C': ret.valency = 4
+  elif s == 'N': ret.valency = 3
+  elif s == 'O': ret.valency = 2
+  else: ret.valency = a.valency
+  
   return ret
 
 def bkchem_bond_to_oasa_bond( b):
