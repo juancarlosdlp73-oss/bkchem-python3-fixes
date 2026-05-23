@@ -147,8 +147,63 @@ class SVG_writer( XML_writer):
     dom_extensions.setAttributes( text, (("x", self.convert( x)), ("y", self.convert( y1)), ("font-family", t.font_family), ("font-size", '%d%s' % (t.font_size, pt_or_px)), ('fill', self.cc( t.line_color))))
     self.group.appendChild( text)
 
-  def add_arrow(self, a): pass
-  def add_plus(self, p): pass
+  def add_arrow(self, a):
+    try:
+      if not hasattr(a, 'items') or not a.items: 
+        return
+
+      # 1. Creamos un grupo contenedor en el SVG para esta flecha
+      l_group = dom_extensions.elementUnder(self.group, 'g', (
+          ('stroke-width', str(getattr(a, 'line_width', 1.0))), 
+          ('stroke', getattr(a, 'line_color', '#000000')),
+          ('stroke-linecap', 'round'),
+          ('stroke-linejoin', 'round')
+      ))
+
+      # 2. Recorremos cada pieza gráfica (línea o polígono) de la flecha
+      for item in a.items:
+        item_type = self.paper.type(item)
+        coords = self.paper.coords(item)
+        if not coords: 
+          continue
+        
+        # Traducimos la lista de coordenadas de Tkinter a texto para el SVG
+        points_list = []
+        for i in range(0, len(coords), 2):
+          x = str(self.convert(coords[i]))
+          y = str(self.convert(coords[i+1]))
+          points_list.append(x + "," + y)
+        points_str = " ".join(points_list)
+
+        # 3. Lo calcamos en el documento final dependiendo de si es línea o punta
+        if item_type == 'line':
+          dom_extensions.elementUnder(l_group, 'polyline', (
+              ('points', points_str),
+              ('fill', 'none')
+          ))
+        elif item_type == 'polygon':
+          dom_extensions.elementUnder(l_group, 'polygon', (
+              ('points', points_str),
+              ('fill', getattr(a, 'line_color', '#000000'))
+          ))
+    except:
+      pass
+  def add_plus(self, p):
+    if not p.item: return
+    # Conseguimos la posición del signo más en la pantalla
+    x, y, x2, y2 = self.paper.bbox(p.item)
+    y1 = y + (y2-y)*0.75
+    # Creamos la etiqueta de texto en el SVG
+    text = self.document.createElement('text')
+    text.appendChild(self.document.createTextNode('+'))
+    dom_extensions.setAttributes(text, (
+        ("x", self.convert(x)), 
+        ("y", self.convert(y1)), 
+        ("font-family", "Helvetica"), 
+        ("font-size", "14pt"), 
+        ('fill', '#000000')
+    ))
+    self.group.appendChild(text)
   def add_rect(self, o): pass
   def add_oval(self, o): pass
   def add_polygon(self, o): pass

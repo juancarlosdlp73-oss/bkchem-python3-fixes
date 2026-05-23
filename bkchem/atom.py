@@ -272,7 +272,12 @@ class atom( drawable_chem_vertex, oasa.atom):
     # 2. El "Escudo" (Fallback): Si no es un átomo reconocido, lo tratamos como texto
     # Pero le asignamos una masa de 0 solo si realmente no hay otra opción
     self.symbol = name 
-    self.show = 1
+    # CAMBIO AQUÍ: Solo mostramos si NO es un Carbono normal
+    if name.upper() == 'C':
+        self.show = 0
+    else:
+        self.show = 1
+        
     self.is_text_only = True
     return True
 

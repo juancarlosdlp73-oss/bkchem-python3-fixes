@@ -88,6 +88,17 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 
 * Refined XML Templates: Manually tuned the templates.cdml file to eliminate coordinate noise, ensuring perfectly vertical/horizontal alignments in Haworth projections.
 
+### 15. Advanced SVG Export for Complex Objects (Arrows & Symbols)
+
+* Dynamic Tkinter Reading: Solved a historic bug where complex geometric objects like curved arrows, equilibrium arrows, and cycle components caused the SVG exporter to crash and output empty files.
+
+* Direct Translation to SVG: Modified xml_writer.py (add_arrow) to iterate through internal Tkinter components (a.items). It now detects lines (polyline) and arrowheads (polygon), extracting screen coordinates directly to perfectly replicate complex arrows in the final SVG.
+
+* Plus Sign Fix: Repaired the reaction + sign export (add_plus) using collision boxes (bbox), ensuring reaction schemes render completely and accurately.
+
+### 16. Atom Counting and Composition Extraction
+
+* Chemical Intelligence: Verified and leveraged the internal OASA engine (paper.py). The program actively reads drawing structures to calculate precise molecular weights, monoisotopic mass, and atomic composition, intelligently counting element occurrences in multi-unit templates.
 
 ---
 
@@ -178,6 +189,19 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 * Relación Fuente-Enlace: Se estandarizaron las longitudes de enlace por defecto en las plantillas para que coincidan con el tamaño relativo de la fuente, evitando el error de "Texto Gigante" al crear polímeros complejos.
 
 * Plantillas XML Refinadas: Sintonización manual del archivo templates.cdml para eliminar el ruido de coordenadas, garantizando alineaciones verticales y horizontales perfectas en las proyecciones de Haworth.
+
+### 15. Exportación Avanzada a SVG para Objetos Complejos (Flechas y Símbolos)
+
+* Lectura Dinámica de Tkinter: Se solucionó un bug histórico donde objetos geométricos complejos (como flechas curvas, de equilibrio o componentes de ciclos) hacían que el exportador SVG colapsara y generara archivos vacíos.
+
+* Traducción Directa a SVG: Se modificó xml_writer.py (add_arrow) para iterar sobre los componentes internos de Tkinter (a.items). Ahora detecta si el lienzo renderizó líneas (polyline) o puntas de flecha (polygon), extrayendo las coordenadas de pantalla directamente para replicar a la perfección cualquier flecha en el SVG final.
+
+* Reparación del Signo Más: Se arregló la exportación del signo + de reacción (add_plus) utilizando cajas de colisión (bbox), garantizando que los esquemas de reacción se rendericen completos y sin errores.
+
+### 16. Recuento de Átomos y Extracción de Composición
+
+* Inteligencia Química: Se verificó y potenció el uso del motor interno OASA (paper.py). El programa lee activamente las estructuras dibujadas para calcular con precisión el peso molecular, la masa monoisotópica y la composición atómica (contando inteligentemente los elementos de las plantillas multi-unidades).
+
 ---
 ###  Modified Files / Archivos Modificados:
 
