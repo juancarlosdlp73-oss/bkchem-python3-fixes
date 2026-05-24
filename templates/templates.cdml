@@ -462,4 +462,79 @@
     <bond start="atom16018" end="atom16019"/>
     <bond start="atom28475" end="atom41738"/>
   </molecule>
+  <molecule name="Fructosa" id="molecule7538">
+        <template atom="atomDummy" bond_first="atomDummy" bond_second="atom39397"/>
+        
+        <atom id="atomDummy" name="H"><point x="6.293cm" y="2.604cm"/></atom>
+
+        <atom id="atom30662" name="C" valency="4"><point x="3.384cm" y="4.025cm"/></atom>
+        <atom id="atom33469" name="C" valency="4"><point x="5.029cm" y="4.025cm"/></atom>
+        
+        <atom id="atom39397" name="C" valency="4"><point x="5.593cm" y="2.604cm"/></atom> <atom id="atom12883" pos="center-first" name="OH" hydrogens="on" valency="2"><point x="5.593cm" y="1.997cm"/></atom> <atom id="atom6035" show="yes" pos="center-first" name="CH2OH" hydrogens="on" valency="4"><point x="5.593cm" y="3.661cm"/></atom> <atom id="atom40208" name="C" valency="4"><point x="2.819cm" y="2.604cm"/></atom> <atom id="atom51019" show="yes" pos="center-first" name="CH2OH" hydrogens="on" valency="4"><point x="2.819cm" y="1.283cm"/></atom> <atom id="atom90225" pos="center-first" name="H" hydrogens="on" valency="1"><point x="2.819cm" y="3.621cm"/></atom> <atom id="atom44302" pos="center-first" name="O" valency="2"><point x="4.182cm" y="1.634cm"/></atom>
+        
+        <atom id="atom59659" pos="center-first" name="OH" hydrogens="on" valency="2"><point x="5.029cm" y="3.364cm"/></atom>
+        <atom id="atom4051" pos="center-first" name="H" hydrogens="on" valency="1"><point x="5.029cm" y="4.711cm"/></atom>
+        <atom id="atom44677" pos="center-first" name="OH" hydrogens="on" valency="2"><point x="3.384cm" y="4.685cm"/></atom>
+        <atom id="atom17131" pos="center-first" name="H" hydrogens="on" valency="1"><point x="3.384cm" y="3.338cm"/></atom>
+        
+        <bond type="n1" line_width="1.0" start="atomDummy" end="atom39397" id="bondDummy" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom39397" end="atom6035" id="bond4449" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom44302" end="atom40208" id="bond64145" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom33469" end="atom4051" id="bond27116" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom33469" end="atom59659" id="bond6779" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom39397" end="atom44302" id="bond38085" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom30662" end="atom44677" id="bond21695" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom40208" end="atom51019" id="bond58074" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom33469" end="atom39397" id="bond82497" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom30662" end="atom17131" id="bond53569" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom30662" end="atom33469" id="bond65547" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom40208" end="atom90225" id="bond46880" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom39397" end="atom12883" id="bond25107" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom40208" end="atom30662" id="bond18138" double_ratio="0.75"/>
+    </molecule>
+
+    <molecule name="D-Glucosa" id="molecule10475">
+        <template atom="atomDummy" bond_first="atomDummy" bond_second="atom75320"/>
+        
+        <atom id="atomDummy" name="H"><point x="5.976cm" y="0.807cm"/></atom>
+
+        <atom id="atom75320" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="5.976cm" y="1.507cm"/></atom>
+        <atom id="atom48950" show="yes" pos="center-last" name="C" hydrogens="on" valency="4"><point x="5.976cm" y="2.207cm"/></atom>
+        <atom id="atom48847" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="5.976cm" y="2.907cm"/></atom>
+        <atom id="atom72439" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="5.976cm" y="3.607cm"/></atom>
+        <atom id="atom66716" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="5.976cm" y="4.307cm"/></atom>
+        <atom id="atom85743" show="yes" pos="center-first" name="CH2OH" hydrogens="on" valency="4"><point x="5.976cm" y="5.007cm"/></atom>
+
+        <atom id="atom67232" pos="center-first" name="O" hydrogens="on" valency="2"><point x="6.583cm" y="1.157cm"/></atom>
+        <atom id="atom51828" pos="center-last" name="H" hydrogens="on" valency="1"><point x="5.370cm" y="1.157cm"/></atom>
+
+        <atom id="atom17035" pos="center-last" name="H" hydrogens="on" valency="1"><point x="5.276cm" y="2.207cm"/></atom>
+        <atom id="atom79013" pos="center-first" name="OH" hydrogens="on" valency="2"><point x="6.676cm" y="2.207cm"/></atom>
+
+        <atom id="atom29422" pos="center-last" name="HO" hydrogens="on" valency="3"><point x="5.276cm" y="2.907cm"/></atom>
+        <atom id="atom31005" pos="center-first" name="H" hydrogens="on" valency="1"><point x="6.676cm" y="2.907cm"/></atom>
+
+        <atom id="atom37434" pos="center-last" name="H" hydrogens="on" valency="1"><point x="5.276cm" y="3.607cm"/></atom>
+        <atom id="atom13998" pos="center-first" name="OH" hydrogens="on" valency="2"><point x="6.676cm" y="3.607cm"/></atom>
+
+        <atom id="atom61868" pos="center-last" name="H" hydrogens="on" valency="1"><point x="5.276cm" y="4.307cm"/></atom>
+        <atom id="atom73278" pos="center-first" name="OH" hydrogens="on" valency="2"><point x="6.676cm" y="4.307cm"/></atom>
+        
+        <bond type="n1" line_width="1.0" start="atomDummy" end="atom75320" id="bondDummy" double_ratio="0.75"/>
+        <bond type="n2" line_width="1.0" start="atom75320" end="atom67232" id="bond6076" double_ratio="0.75" bond_width="6.0" center="yes"/>
+        <bond type="n1" line_width="1.0" start="atom75320" end="atom51828" id="bond30868" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom75320" end="atom48950" id="bond22070" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom48950" end="atom17035" id="bond51269" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom48950" end="atom48847" id="bond28296" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom48950" end="atom79013" id="bond82507" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom48847" end="atom72439" id="bond3581" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom48847" end="atom31005" id="bond42581" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom48847" end="atom29422" id="bond20172" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom72439" end="atom37434" id="bond73992" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom72439" end="atom13998" id="bond66653" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom72439" end="atom66716" id="bond3237" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom66716" end="atom61868" id="bond16957" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom66716" end="atom73278" id="bond41493" double_ratio="0.75"/>
+        <bond type="n1" line_width="1.0" start="atom66716" end="atom85743" id="bond60375" double_ratio="0.75"/>
+    </molecule>
 </cdml>

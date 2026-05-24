@@ -100,6 +100,12 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 
 * Chemical Intelligence: Verified and leveraged the internal OASA engine (paper.py). The program actively reads drawing structures to calculate precise molecular weights, monoisotopic mass, and atomic composition, intelligently counting element occurrences in multi-unit templates.
 
+### 17. Advanced Template Engine (Fructofuranose and Fischer)
+* Integrated Beta-D-Fructofuranose using a "dummy-atom" anchor system to prevent the deletion of functional groups during insertion.
+* Millimeter-perfect geometric alignment in Fischer projections (D-Glucose), fixing coordinate offsets and ensuring the integrity of the aldehyde (CHO) group through dedicated anchor nodes.
+
+### 18. XML Template Stabilization
+* Resolved XML syntax errors by implementing "dummy" nodes in template scripts, preventing application crashes when loading custom structures.
 ---
 
 #  BKChem - Versión Corregida por JuanCarlos (Python 3.12)
@@ -201,6 +207,14 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 ### 16. Recuento de Átomos y Extracción de Composición
 
 * Inteligencia Química: Se verificó y potenció el uso del motor interno OASA (paper.py). El programa lee activamente las estructuras dibujadas para calcular con precisión el peso molecular, la masa monoisotópica y la composición atómica (contando inteligentemente los elementos de las plantillas multi-unidades).
+
+### 17. Engine de Plantillas Avanzadas (Fructofuranosa y Fischer)
+* Integración de Beta-D-Fructofuranosa con sistema de anclaje por "átomo fantasma" para evitar la eliminación de grupos funcionales durante la inserción.
+* Alineación geométrica milimétrica en proyecciones de Fischer (D-Glucosa), corrigiendo desfases en enlaces y asegurando la integridad de los grupos aldehído (CHO) mediante el uso de nodos de anclaje dedicados.
+
+### 18. Estabilización de Plantillas
+* Corrección de errores de sintaxis XML mediante la implementación de nodos Dummy en los scripts de plantillas, evitando colapsos del programa al cargar estructuras personalizadas.
+
 
 ---
 ###  Modified Files / Archivos Modificados:
