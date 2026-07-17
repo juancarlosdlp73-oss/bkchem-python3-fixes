@@ -106,6 +106,12 @@ This repository contains a fixed and adapted version of **BKChem**, specifically
 
 ### 18. XML Template Stabilization
 * Resolved XML syntax errors by implementing "dummy" nodes in template scripts, preventing application crashes when loading custom structures.
+
+### 19. **Implementation of "Purge Phantom Items" Tool**: 
+*  Added an automated cleaning tool to the **Edit** menu to remove atoms located in the lower area of the canvas (Y-coordinate > 500 pixels).
+*  The tool performs a surgical removal, extracting atoms directly from the molecule structure and forcing a visual refresh to prevent memory errors and orphan bonds.
+*  This feature allows the bottom of the canvas to be used as a "trash zone" for residue, accidental clicks, or corrupted structures[cite: 1, 2].
+
 ---
 
 #  BKChem - Versión Corregida por JuanCarlos (Python 3.12)
@@ -215,14 +221,19 @@ Este repositorio contiene una versión de **BKChem** adaptada y reparada para fu
 ### 18. Estabilización de Plantillas
 * Corrección de errores de sintaxis XML mediante la implementación de nodos Dummy en los scripts de plantillas, evitando colapsos del programa al cargar estructuras personalizadas.
 
+### 19. **Implementación de Herramienta de Purga (Purge Phantom Items)**: 
+*  Se ha añadido una función de limpieza automática al menú **Edit** para eliminar átomos situados en la zona inferior del lienzo (coordenadas Y > 500 píxeles).
+*  La herramienta actúa de forma quirúrgica eliminando los átomos de la estructura de la molécula y forzando el refresco visual, evitando errores de memoria y enlaces huérfanos.
+*  Esta funcionalidad permite utilizar la parte inferior del lienzo como una "zona de descarte" para residuos, clics accidentales o estructuras corruptas.
+
 
 ---
 ###  Modified Files / Archivos Modificados:
 
 * bkchem/xml_writer.py (SVG Subscripts & Binary CDML Export)
-* bkchem/paper.py (Viewport & Auto-Crop Fix)
+* bkchem/paper.py (Viewport & Auto-Crop Fix , purge phantom items)
 * bkchem/export.py (Smart Directory Paths)
-* bkchem/main.py (Double-click, Template Logic & XML Sanitizer)
+* bkchem/main.py (Double-click, Template Logic & XML Sanitizer, command Purge elements added)
 * bkchem/classes.py (Text Tool & Unicode/Str Migration)
 * bkchem/atom.py (Symbol Cleaning & Validation Shield)
 * bkchem/molecule.py (Validation Shield & Template Properties)
