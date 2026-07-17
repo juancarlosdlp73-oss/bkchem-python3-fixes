@@ -288,36 +288,64 @@ class molecule( container, top_level, id_enabled, oasa.molecule, with_paper):
       # check_integrity should be called before redrawing, because it moves atoms and bonds
       # to new molecules when the molecule is spit and avoids working on non-connected graph
       offspring = self.check_integrity()
+      
+      # --- AQUÍ EMPIEZA EL CAMBIO SEGURIZADO CON TRY/EXCEPT ---
       if redraw:
-        bonds_to_redraw = []
-        for b in deleted:
-          if b.object_type == 'bond':
-            for a in b.atoms:
-              if a in self.atoms:
-                bonds_to_redraw.extend( a.neighbor_edges)
-        [o.redraw( recalc_side=1) for o in misc.filter_unique( bonds_to_redraw) if o.order == 2 and o.item]
-        [o.decide_pos() for o in self.atoms if isinstance( o, atom)]
-        [o.redraw() for o in self.atoms]
+        try:
+          bonds_to_redraw = []
+          for b in deleted:
+            if b.object_type == 'bond':
+              for a in b.atoms:
+                if a in self.atoms:
+                  bonds_to_redraw.extend( a.neighbor_edges)
+          # Validamos de forma segura si el objeto gráfico existe en el canvas antes de redibujar
+          [o.redraw( recalc_side=1) for o in misc.filter_unique( bonds_to_redraw) if o.order == 2 and hasattr(o, 'item') and o.item]
+          [o.decide_pos() for o in self.atoms if isinstance( o, atom)]
+          [o.redraw() for o in self.atoms]
+        except Exception as e:
+          # Si Tkinter o el motor gráfico se quejan por reajustar un átomo suelto,
+          # ignoramos el fallo estético para que complete la destrucción del objeto en pantalla
+          print(f"DEBUG: Aviso gráfico ignorado en borrado: {e}")
+          pass
+      # --- AQUÍ TERMINA EL CAMBIO ---
+      
     else:
       offspring = self.check_integrity()
       deleted += map( self.delete_bond, copy.copy( self.bonds))
     return deleted, offspring
 
+    
   def delete_bond( self, item):
     item.delete()
     self.disconnect_edge( item)
     return item
       
   def delete_atom( self, item):
-    "remove links to atom from molecule records"
-    self.vertices.remove( item)
+    "remove links to atom from molecule records and global registry"
+    # Comprobamos si el átomo existe en la lista de vértices antes de quitarlo
+    if item in self.vertices:
+      self.vertices.remove( item)
+    
+    # EL FIX DE PERSISTENCIA: Damos de baja el ID del átomo en el registro global
+    if hasattr(item, 'id') and item.id:
+      Store.id_manager.unregister_id(item.id)
+      
+    # EL FIX DEL DOM XML: Purgamos el nodo físico del árbol DOM en memoria cacheada
+    if hasattr(item, 'xml_node') and item.xml_node:
+      node = item.xml_node
+      if node and node.parentNode:
+        node.parentNode.removeChild(node)
+        
+    # Borramos la representación gráfica en la pantalla de Tkinter
     item.delete()
+    
+    # CORRECCIÓN PYTHON 3: Cambiamos las variables huérfanas por propiedades reales con self.
     if item == self.t_atom:
-      t_atom = None
+      self.t_atom = None
     if item == self.t_bond_first:
-      t_bond_first = None
+      self.t_bond_first = None
     if item == self.t_bond_second:
-      t_bond_second = None
+      self.t_bond_second = None
     return item
 
   def create_new_atom( self, x, y, name=None, vertex_class=None):
@@ -384,19 +412,19 @@ class molecule( container, top_level, id_enabled, oasa.molecule, with_paper):
       self.display_form = ''.join( [e.toxml() for e in df.childNodes]).encode('utf-8')
 
     # fragments
+    # Recorremos de manera estable todos los fragmentos almacenados en el XML del archivo
     for fel in dom_extensions.simpleXPathSearch( package, "fragment"):
-      f = fragment()
-        # --- CAMBIO AQUÍ ---
       try:
-          if v.set_name( text, occupied_valency=val):
-              v.redraw()
-      except Exception:
-          # Si el nombre es "raro" como OH, lo ignoramos para que no explote
-          pass
-      # --- FIN DEL CAMBIO ---
-
-      else:
-        self.fragments.add( f)
+        f = fragment()
+        # Si el objeto fragmento cuenta con su cargador nativo, procesamos sus datos
+        if hasattr(f, 'read_package'):
+          f.read_package(fel)
+        # Añadimos el objeto verificado al conjunto de fragmentos de la molécula
+        self.fragments.add(f)
+      except Exception as fe:
+        # El escudo evita que fallos de sintaxis en el fragmento cuelguen el programa
+        print(f"Aviso en lectura de fragmento CDML: {fe}")
+        pass
 
     ud = dom_extensions.getChildrenNamed( package, "user-data")
     if ud:
@@ -615,13 +643,13 @@ class molecule( container, top_level, id_enabled, oasa.molecule, with_paper):
 
 
   def flush_graph_to_file( self, name="/home/beda/oasa/oasa/mol.graph"):
-    f = file( name, 'w')
-    for a in self.atoms:
-      f.write('%s ' % a.symbol)
-    f.write('\n')
-    for b in self.bonds:
-      f.write('%d %d %d\n' % (b.order, self.atoms.index( b.atom1), self.atoms.index( b.atom2)))
-    f.close()
+    # Reemplazamos la función file() eliminada en Python 3 por un bloque 'with open' nativo
+    with open( name, 'w', encoding='utf-8') as f:
+      for a in self.atoms:
+        f.write('%s ' % a.symbol)
+      f.write('\n')
+      for b in self.bonds:
+        f.write('%d %d %d\n' % (b.order, self.atoms.index( b.atom1), self.atoms.index( b.atom2)))
 
 
 

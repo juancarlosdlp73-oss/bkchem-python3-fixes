@@ -818,7 +818,9 @@ class chem_paper( Canvas, object):
 
   def del_container( self, container):
     container.delete()
-    self.stack.remove( container)
+    # FIX DE SEGURIDAD: Comprobamos si el contenedor existe en la pila antes de removerlo
+    if container in self.stack:
+      self.stack.remove( container)
 
 
 
@@ -2124,3 +2126,30 @@ class chem_paper( Canvas, object):
       ymax = y1
     return xmin, ymin, xmax, ymax
   
+  def purge_phantom_items(self):
+    """Limpia SOLO los átomos fuera de pantalla sin tocar enlaces"""
+    import tkinter.messagebox as tkMessageBox
+    
+    LIMITE_PIXELES_Y = 500
+    atoms_purged_count = 0
+
+    # 1. Recorremos solo los átomos
+    for mol in list(self.stack):
+      if not hasattr(mol, 'atoms'): continue
+      
+      # Filtramos los átomos que están en la zona prohibida
+      for at in list(mol.atoms):
+        if getattr(at, 'y', 0) > LIMITE_PIXELES_Y:
+            # Borramos el átomo de la lista de la molécula
+            mol.atoms.remove(at)
+            # Borrado visual básico
+            if hasattr(at, 'delete'): at.delete()
+            atoms_purged_count += 1
+            
+    # 2. Refresco gráfico
+    self.changes_made = 1
+    if hasattr(self, 'redraw'): self.redraw()
+    elif hasattr(self, 'display_all'): self.display_all()
+    
+    self.start_new_undo_record()
+    tkMessageBox.showinfo("Caza-Fantasmas", f"Se han eliminado {atoms_purged_count} átomos de la zona baja.")

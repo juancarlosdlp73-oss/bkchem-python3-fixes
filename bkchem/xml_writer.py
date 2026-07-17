@@ -152,7 +152,7 @@ class SVG_writer( XML_writer):
       if not hasattr(a, 'items') or not a.items: 
         return
 
-      # 1. Creamos un grupo contenedor en el SVG para esta flecha
+      # 1. Grupo contenedor con vuestras propiedades estándar
       l_group = dom_extensions.elementUnder(self.group, 'g', (
           ('stroke-width', str(getattr(a, 'line_width', 1.0))), 
           ('stroke', getattr(a, 'line_color', '#000000')),
@@ -160,14 +160,49 @@ class SVG_writer( XML_writer):
           ('stroke-linejoin', 'round')
       ))
 
-      # 2. Recorremos cada pieza gráfica (línea o polígono) de la flecha
+      # 2. ATAQUE VECTORIAL REPARADO PARA OBJETOS 'POINT'
+      es_curva = getattr(a, 'is_curved', False) or (hasattr(a, 'points') and len(a.points) >= 4)
+
+      if es_curva:
+        # Extraemos los objetos point independientes de la lista
+        p0 = a.points[0]
+        p1 = a.points[1]
+        p2 = a.points[2]
+        p3 = a.points[3]
+        
+        # CORRECCIÓN DE SINTAXIS: Usamos .x y .y en lugar de [0] y [1]
+        x0, y0 = self.convert(p0.x), self.convert(p0.y)
+        x1, y1 = self.convert(p1.x), self.convert(p1.y)
+        x2, y2 = self.convert(p2.x), self.convert(p2.y)
+        x3, y3 = self.convert(p3.x), self.convert(p3.y)
+        
+        # Construimos el comando d nativo con Bezier Cúbica (C) perfecta
+        path_d = f"M {x0},{y0} C {x1},{y1} {x2},{y2} {x3},{y3}"
+        
+        # Inyectamos la curva real infinitamente escalable en el SVG
+        dom_extensions.elementUnder(l_group, 'path', (
+            ('d', path_d),
+            ('fill', 'none')
+        ))
+        
+        # DIBUJO DE LA PUNTA DE LA FLECHA: Conservamos vuestro mapeo de Tkinter para el triángulo
+        for item in a.items:
+          if self.paper.type(item) == 'polygon':
+            coords = self.paper.coords(item)
+            points_list = [f"{self.convert(coords[i])},{self.convert(coords[i+1])}" for i in range(0, len(coords), 2)]
+            dom_extensions.elementUnder(l_group, 'polygon', (
+                ('points', " ".join(points_list)),
+                ('fill', getattr(a, 'line_color', '#000000'))
+            ))
+        return # Exportación limpia completada para flecha curva
+
+      # 3. MODO COMPATIBILIDAD (Vuestro código original intacto para flechas rectas)
       for item in a.items:
         item_type = self.paper.type(item)
         coords = self.paper.coords(item)
         if not coords: 
           continue
         
-        # Traducimos la lista de coordenadas de Tkinter a texto para el SVG
         points_list = []
         for i in range(0, len(coords), 2):
           x = str(self.convert(coords[i]))
@@ -175,7 +210,6 @@ class SVG_writer( XML_writer):
           points_list.append(x + "," + y)
         points_str = " ".join(points_list)
 
-        # 3. Lo calcamos en el documento final dependiendo de si es línea o punta
         if item_type == 'line':
           dom_extensions.elementUnder(l_group, 'polyline', (
               ('points', points_str),
@@ -186,8 +220,14 @@ class SVG_writer( XML_writer):
               ('points', points_str),
               ('fill', getattr(a, 'line_color', '#000000'))
           ))
-    except:
+          
+    except Exception as e:
+      print(f"--- ERROR EN ADD_ARROW VECTORIAL ---")
+      print(f"Causa: {e}")
+      import traceback
+      traceback.print_exc() # Esto nos dará el log completo si algo más se resiste
       pass
+
   def add_plus(self, p):
     if not p.item: return
     # Conseguimos la posición del signo más en la pantalla

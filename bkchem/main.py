@@ -314,6 +314,8 @@ class BKChem( Tk):
       ( _("Align"), 'separator'),
       ( _("Align"), 'command', _('Center horizontally'), '(C-a C-h)', _("Align the horizontal centers of selected objects"), lambda : self.paper.align_selected( 'h'), 'two_or_more_selected'),
       ( _("Align"), 'command', _('Center vertically'), '(C-a C-v)', _("Align the vertical centers of selected objects"), lambda : self.paper.align_selected( 'v'), 'two_or_more_selected'),
+      ( _("Edit"),  'separator'),
+      ( _("Edit"),  'command', _('Purge Phantom Items'), None, _("Scan canvas and remove invisible or off-screen items"), lambda : self.paper.purge_phantom_items(), None),
 
       # object menu
       ( _("Object"), 'menu',    _("Set properties of selected objects"), 'left'),

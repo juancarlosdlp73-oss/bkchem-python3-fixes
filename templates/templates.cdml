@@ -537,4 +537,168 @@
         <bond type="n1" line_width="1.0" start="atom66716" end="atom73278" id="bond41493" double_ratio="0.75"/>
         <bond type="n1" line_width="1.0" start="atom66716" end="atom85743" id="bond60375" double_ratio="0.75"/>
     </molecule>
+    
+
+    <molecule name="Acido Palmitico" id="molecule70595">
+    <template atom="atomDummy" bond_first="atomDummy" bond_second="atom60142"/>
+    <atom id="atomDummy" name="H" hydrogens="on" valency="1"><point x="15.525cm" y="5.900cm"/></atom>
+
+    <atom id="atom49037" name="C" hydrogens="on" valency="4"><point x="6.432cm" y="5.098cm"/></atom>
+    <atom id="atom20520" name="C" hydrogens="on" valency="4"><point x="7.038cm" y="5.448cm"/></atom>
+    <atom id="atom30235" name="C" hydrogens="on" valency="4"><point x="7.644cm" y="5.098cm"/></atom>
+    <atom id="atom79301" name="C" hydrogens="on" valency="4"><point x="8.251cm" y="5.448cm"/></atom>
+    <atom id="atom65088" name="C" hydrogens="on" valency="4"><point x="8.857cm" y="5.098cm"/></atom>
+    <atom id="atom52006" name="C" hydrogens="on" valency="4"><point x="9.463cm" y="5.448cm"/></atom>
+    <atom id="atom30247" name="C" hydrogens="on" valency="4"><point x="10.069cm" y="5.098cm"/></atom>
+    <atom id="atom30148" name="C" hydrogens="on" valency="4"><point x="10.676cm" y="5.448cm"/></atom>
+    <atom id="atom4555" name="C" hydrogens="on" valency="4"><point x="11.282cm" y="5.098cm"/></atom>
+    <atom id="atom94636" name="C" hydrogens="on" valency="4"><point x="11.888cm" y="5.448cm"/></atom>
+    <atom id="atom5290" name="C" hydrogens="on" valency="4"><point x="12.494cm" y="5.098cm"/></atom>
+    <atom id="atom83969" name="C" hydrogens="on" valency="4"><point x="13.100cm" y="5.448cm"/></atom>
+    <atom id="atom4701" name="C" hydrogens="on" valency="4"><point x="13.707cm" y="5.098cm"/></atom>
+    <atom id="atom87852" name="C" hydrogens="on" valency="4"><point x="14.313cm" y="5.448cm"/></atom>
+    <atom id="atom62057" name="C" hydrogens="on" valency="4"><point x="14.919cm" y="5.098cm"/></atom>
+    
+    <atom id="atom60142" name="C" show="yes" valency="4"><point x="15.525cm" y="5.448cm"/></atom>
+    <atom id="atom66128" name="O" show="yes" valency="2"><point x="16.131cm" y="5.098cm"/></atom>
+    <atom id="atom65856" name="OH" show="yes" valency="2"><point x="15.525cm" y="6.148cm"/></atom>
+
+    <bond type="n1" start="atomDummy" end="atom60142" id="bond_anchor"/>
+    <bond type="n2" start="atom60142" end="atom66128" id="bond94294" bond_width="6.0" center="yes"/>
+    <bond type="n1" start="atom60142" end="atom65856" id="bond48773"/>
+    
+    <bond type="n1" start="atom52006" end="atom30247" id="bond46224"/>
+    <bond type="n1" start="atom62057" end="atom60142" id="bond40414"/>
+    <bond type="n1" start="atom79301" end="atom65088" id="bond94612"/>
+    <bond type="n1" start="atom87852" end="atom62057" id="bond75418"/>
+    <bond type="n1" start="atom4555" end="atom94636" id="bond72043"/>
+    <bond type="n1" start="atom79301" end="atom30235" id="bond91518"/>
+    <bond type="n1" start="atom30235" end="atom20520" id="bond17396"/>
+    <bond type="n1" start="atom4701" end="atom87852" id="bond74809"/>
+    <bond type="n1" start="atom5290" end="atom83969" id="bond22459"/>
+    <bond type="n1" start="atom30148" end="atom4555" id="bond93431"/>
+    <bond type="n1" start="atom94636" end="atom5290" id="bond5783"/>
+    <bond type="n1" start="atom83969" end="atom4701" id="bond87235"/>
+    <bond type="n1" start="atom30247" end="atom30148" id="bond51525"/>
+    <bond type="n1" start="atom65088" end="atom52006" id="bond87940"/>
+    <bond type="n1" start="atom20520" end="atom49037" id="bond23400"/>
+</molecule>
+
+
+  <molecule name="Glicerol" id="molecule12934">
+    <template atom="atomDummy" bond_first="atomDummy" bond_second="atom62412"/>
+    <atom id="atomDummy" name="H" hydrogens="on" valency="1"><point x="2.565cm" y="0.300cm"/></atom>
+
+    <atom id="atom62412" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="2.565cm" y="1.110cm"/></atom>
+    <atom id="atom13583" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="2.563cm" y="2.056cm"/></atom>
+    <atom id="atom77368" show="yes" pos="center-last" name="C" hydrogens="on" valency="4"><point x="2.561cm" y="3.041cm"/></atom>
+    <atom id="atom28019" pos="center-first" name="OH" hydrogens="on" valency="2"><point x="3.265cm" y="1.110cm"/></atom>
+    <atom id="atom54917" pos="center-last" name="H" hydrogens="on" valency="1"><point x="1.912cm" y="1.118cm"/></atom>
+    <atom id="atom19157" pos="center-first" name="H" hydrogens="on" valency="1"><point x="2.569cm" y="0.279cm"/></atom>
+    <atom id="atom61732" pos="center-first" name="OH" hydrogens="on" valency="2"><point x="3.231cm" y="2.058cm"/></atom>
+    <atom id="atom53498" pos="center-first" name="OH" hydrogens="on" valency="2"><point x="3.246cm" y="3.048cm"/></atom>
+    <atom id="atom37970" pos="center-last" name="H" hydrogens="on" valency="1"><point x="1.902cm" y="3.034cm"/></atom>
+    <atom id="atom10639" pos="center-first" name="H" hydrogens="on" valency="1"><point x="2.563cm" y="3.919cm"/></atom>
+    <atom id="atom78790" pos="center-last" name="H" hydrogens="on" valency="1"><point x="1.890cm" y="2.055cm"/></atom>
+
+    <bond type="n1" start="atomDummy" end="atom62412" id="bond_anchor"/>
+    
+    <bond type="n1" start="atom77368" end="atom10639" id="bond34164"/>
+    <bond type="n1" start="atom62412" end="atom54917" id="bond79761"/>
+    <bond type="n1" start="atom13583" end="atom61732" id="bond87456"/>
+    <bond type="n1" start="atom62412" end="atom19157" id="bond34788"/>
+    <bond type="n1" start="atom62412" end="atom28019" id="bond62217"/>
+    <bond type="n1" start="atom77368" end="atom53498" id="bond59870"/>
+    <bond type="n1" start="atom13583" end="atom77368" id="bond57663"/>
+    <bond type="n1" start="atom62412" end="atom13583" id="bond85156"/>
+    <bond type="n1" start="atom13583" end="atom78790" id="bond25052"/>
+    <bond type="n1" start="atom77368" end="atom37970" id="bond17154"/>
+</molecule>
+  <molecule name="Colesterol" id="molecule51731">
+    <!-- Definición del template y el punto de anclaje (Dummy) -->
+    <template atom="atomDummy" bond_first="atomDummy" bond_second="atom93903"/>
+    <atom id="atomDummy" name="H" hydrogens="on" valency="1"><point x="2.400cm" y="5.387cm"/></atom>
+
+    <!-- Átomos del colesterol -->
+    <atom id="atom5688" name="C" valency="4"><point x="4.312cm" y="5.387cm"/></atom>
+    <atom id="atom43992" name="C" valency="4"><point x="4.919cm" y="5.037cm"/></atom>
+    <atom id="atom35916" name="C" valency="4"><point x="4.919cm" y="4.337cm"/></atom>
+    <atom id="atom24965" name="C" valency="4"><point x="4.312cm" y="3.987cm"/></atom>
+    <atom id="atom85703" name="C" valency="4"><point x="3.706cm" y="4.337cm"/></atom>
+    <atom id="atom49240" name="C" valency="4"><point x="3.706cm" y="5.037cm"/></atom>
+    <atom id="atom38543" name="C" valency="4"><point x="5.525cm" y="5.387cm"/></atom>
+    <atom id="atom81654" name="C" valency="4"><point x="6.131cm" y="5.037cm"/></atom>
+    <atom id="atom52472" name="C" valency="4"><point x="6.131cm" y="4.337cm"/></atom>
+    <atom id="atom39755" name="C" valency="4"><point x="5.525cm" y="3.987cm"/></atom>
+    <atom id="atom14130" name="C" valency="4"><point x="6.737cm" y="3.986cm"/></atom>
+    <atom id="atom12207" name="C" valency="4"><point x="6.737cm" y="3.286cm"/></atom>
+    <atom id="atom84109" name="C" valency="4"><point x="6.131cm" y="2.937cm"/></atom>
+    <atom id="atom16622" name="C" valency="4"><point x="5.525cm" y="3.287cm"/></atom>
+    <atom id="atom60639" name="C" valency="4"><point x="7.403cm" y="3.070cm"/></atom>
+    <atom id="atom62422" name="C" valency="4"><point x="7.815cm" y="3.636cm"/></atom>
+    <atom id="atom22281" name="C" valency="4"><point x="7.403cm" y="4.202cm"/></atom>
+    <atom id="atom47303" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="7.619cm" y="2.404cm"/></atom>
+    <atom id="atom912" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="8.315cm" y="2.005cm"/></atom>
+    <atom id="atom67247" show="yes" pos="center-last" name="C" hydrogens="on" valency="4"><point x="7.148cm" y="1.902cm"/></atom>
+    <atom id="atom19629" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="9.263cm" y="2.005cm"/></atom>
+    <atom id="atom42045" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="10.201cm" y="2.005cm"/></atom>
+    <atom id="atom79553" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="11.171cm" y="2.005cm"/></atom>
+    <atom id="atom14416" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="12.115cm" y="2.005cm"/></atom>
+    <atom id="atom57084" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="6.757cm" y="2.617cm"/></atom>
+    <atom id="atom11803" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="4.919cm" y="3.610cm"/></atom>
+    <atom id="atom93903" pos="center-last" name="OH" hydrogens="on" valency="2"><point x="3.100cm" y="5.387cm"/></atom>
+    <atom id="atom92840" show="yes" pos="center-first" name="C" hydrogens="on" valency="4"><point x="11.171cm" y="1.305cm"/></atom>
+
+    <!-- Enlace ancla para el template -->
+    <bond type="n1" line_width="1.0" start="atomDummy" end="atom93903" id="bond_anchor" double_ratio="0.75"/>
+
+    <!-- Enlaces del colesterol -->
+    <bond type="n1" line_width="1.0" start="atom62422" end="atom22281" id="bond118" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom22281" end="atom14130" id="bond4289" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom60639" end="atom62422" id="bond53653" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom12207" end="atom60639" id="bond61135" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom35916" end="atom11803" id="bond90925" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom79553" end="atom92840" id="bond38379" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom47303" end="atom912" id="bond47218" double_ratio="0.75"/>
+    <bond type="n2" line_width="1.0" start="atom43992" end="atom38543" id="bond16034" double_ratio="0.75" bond_width="6.0" center="no"/>
+    <bond type="n1" line_width="1.0" start="atom12207" end="atom57084" id="bond68399" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom42045" end="atom79553" id="bond57660" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom49240" end="atom5688" id="bond66505" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom49240" end="atom93903" id="bond9774" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom52472" end="atom39755" id="bond31707" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom912" end="atom19629" id="bond80366" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom39755" end="atom35916" id="bond14069" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom52472" end="atom14130" id="bond81252" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom81654" end="atom52472" id="bond50204" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom47303" end="atom67247" id="bond26564" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom38543" end="atom81654" id="bond26915" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom35916" end="atom24965" id="bond17445" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom24965" end="atom85703" id="bond25925" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom19629" end="atom42045" id="bond63907" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom85703" end="atom49240" id="bond99889" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom43992" end="atom35916" id="bond76301" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom79553" end="atom14416" id="bond15679" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom84109" end="atom16622" id="bond89495" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom5688" end="atom43992" id="bond54041" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom16622" end="atom39755" id="bond43801" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom12207" end="atom84109" id="bond90018" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom14130" end="atom12207" id="bond52763" double_ratio="0.75"/>
+    <bond type="n1" line_width="1.0" start="atom60639" end="atom47303" id="bond96501" double_ratio="0.75"/>
+
+    <!-- Fragmento de cadena -->
+    <fragment id="frag52105" type="linear_form">
+        <name>linear_form</name>
+        <bond id="bond80366"/>
+        <bond id="bond15679"/>
+        <bond id="bond63907"/>
+        <bond id="bond57660"/>
+        <vertex id="atom14416"/>
+        <vertex id="atom19629"/>
+        <vertex id="atom42045"/>
+        <vertex id="atom79553"/>
+        <vertex id="atom912"/>
+        <property name="bond_length" value="10" type="str"/>
+    </fragment>
+</molecule>
+
 </cdml>
